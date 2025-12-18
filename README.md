@@ -1,6 +1,12 @@
 # Docs Monorepo
 
-### Selecting PR Template 
+* source code of https://www.mongodb.com/docs/
+
+## [documentation](content/landing/source/index.md)
+
+## [platform](platform/README.md)
+
+## Selecting PR Template 
 
 When creating a pull request, you can automatically populate the
 description with a template by adding a query parameter to the URL. We

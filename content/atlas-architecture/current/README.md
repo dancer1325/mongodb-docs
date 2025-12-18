@@ -1,11 +1,8 @@
 # Atlas Architecture Center
 
-A content repository for the Atlas Architecture Center documentation site.
+* Atlas Architecture Center documentation site
 
-## Report Issues
-
-To file issues or requests regarding the documentation, go to the
-[Documentation Jira Project](https://jira.mongodb.org/browse/DOCS).
+## [documentation](source/index.md)
 
 ## License
 

@@ -1,0 +1,241 @@
+================================
+Tools, Migrators, and Connectors
+================================
+
+* goal
+  * tools and connectors / 
+    * allows, about MongoDB data | DIFFERENT environments and platforms, 
+      * integrate,
+      * migrate
+      * visualize data
+
+CLIs and Utilities
+------------------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: Atlas CLI
+      :url: https://www.mongodb.com/docs/atlas/cli/current/
+      :icon: atlas_cli
+      :icon-alt: Atlas CLI LogoMark
+
+      Learn how to use the Atlas CLI to manage your MongoDB Atlas deployment.
+   
+   .. card::
+      :headline: MongoDB CLI
+      :url: https://www.mongodb.com/docs/mongocli/current/
+      :icon: mdb_cli
+      :icon-alt: MongoDB CLI LogoMark
+
+      Use the MongoDB CLI to manage your MongoDB services from the command line.
+
+   .. card::
+      :headline: Database Tools
+      :url: https://www.mongodb.com/docs/database-tools/
+      :icon: general_features_tools
+      :icon-alt: Database Tools LogoMark
+
+      Export data from one MongoDB cluster to a JSON, BSON,
+      CSV, or TSV file and import it to another MongoDB cluster.
+   
+   .. card::
+      :headline: Mongo Shell
+      :url: https://www.mongodb.com/docs/mongodb-shell/
+      :icon: mdb_shell
+      :icon-alt: MongoDB Shell LogoMark
+
+      Learn about the ``mongosh`` tool to test queries and interact with your MongoDB
+      database.
+
+Connectors
+----------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: BI Connector
+      :url: https://www.mongodb.com/docs/bi-connector/current/
+      :icon: connectors_bi_connector
+      :icon-alt: BI Connector LogoMark
+
+      Connect MongoDB to your favorite BI platforms to visualize, graph, and
+      report on your MongoDB data.
+
+   .. card::
+      :headline: Kafka Connector
+      :url: https://docs.mongodb.com/kafka-connector/current/
+      :icon: connectors_kafka
+      :icon-alt: Kafka Connector LogoMark
+
+      Build robust pipelines that stream events between applications with
+      MongoDB and Apache Kafka.
+
+   .. card::
+      :headline: Spark Connector
+      :url: https://www.mongodb.com/docs/spark-connector/current/
+      :icon: connectors
+      :icon-alt: Spark LogoMark
+
+      Leverage Apache Spark's libraries to analyze MongoDB data with machine
+      learning, graph, and SQL APIs.      
+
+IDE and AI Integrations
+-----------------------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: MongoDB MCP Server
+      :url: https://www.mongodb.com/docs/mcp-server/
+      :icon: general_features_tools
+      :icon-alt: MCP server icon
+
+      Interact with your MongoDB data and deployments from your 
+      agentic AI tools, assistants, and platforms.
+
+   .. card::
+      :headline: C# Analyzer
+      :url: https://www.mongodb.com/docs/mongodb-analyzer/current/
+      :icon: general_features_build_faster
+      :icon-alt: C# Analyzer LogoMark
+
+      Understand and troubleshoot queries and aggregations directly inside
+      Visual Studio and other tools.
+
+   .. card::
+      :headline: VS Code Extension
+      :url: https://www.mongodb.com/docs/mongodb-vscode/
+      :icon: mdb_shell
+      :icon-alt: VS Code Extension LogoMark
+
+      Find out how you can manage your data directly within your coding
+      environment.
+
+   .. card::
+      :headline: IntelliJ Plugin 
+      :url: https://www.mongodb.com/docs/mongodb-intellij/
+      :icon: mdb_shell
+      :icon-alt: IntelliJ Plugin LogoMark
+
+      Build applications and work with your MongoDB data directly from 
+      IntelliJ IDEA.
+
+Migrators
+---------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: Mongosync
+      :url: https://www.mongodb.com/docs/mongosync/current/
+      :icon: mdb_cluster_to_cluster_sync
+      :icon-alt: Cluster-to-Cluster Sync LogoMark
+
+      Continuously synchronize data between MongoDB clusters
+      in the same or hybrid environments, including Atlas,
+      private cloud, on-premises, and at the edge.
+      
+   .. card::
+      :headline: Relational Migrator
+      :url: https://www.mongodb.com/docs/relational-migrator/
+      :icon: mdb_migrator
+      :icon-alt: Relational Migrator LogoMark
+   
+      Migrate data from your relational database to MongoDB.
+
+Management Tools
+----------------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: Cloud Manager
+      :url: https://www.mongodb.com/docs/cloud-manager
+      :icon: atlas_cloud_manager
+      :icon-alt: Cloud Manager LogoMark
+
+      Use the hosted management platform to monitor, automate, and backup
+      self-managed deployments.
+
+   .. card::
+      :headline: Ops Manager
+      :url: https://www.mongodb.com/docs/ops-manager/current/
+      :icon: enterpriseadvanced_ops_manager
+      :icon-alt: Ops Manager LogoMark
+
+      Deploy, monitor, back up, and scale MongoDB on your own infrastructure.
+
+Partner Integrations
+--------------------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: Overview
+      :url: https://www.mongodb.com/docs/atlas/partner-integrations/
+      :icon: atlas_integration
+      :icon-alt: Partner Integrations LogoMark
+
+      Learn how MongoDB integrates with partner technologies to enhance your
+      applications and workflows.
+   
+   .. card::
+      :headline: Render
+      :url: https://www.mongodb.com/docs/atlas/reference/partner-integrations/render/
+      :icon: atlas_integration
+      :icon-alt: Render LogoMark
+
+      Connect your Render-hosted applications to an Atlas cluster.
+
+   .. card::
+      :headline: Vercel
+      :url: https://www.mongodb.com/docs/atlas/reference/partner-integrations/vercel/
+      :icon: atlas_integration
+      :icon-alt: Vercel LogoMark
+
+      Connect your Atlas clusters to applications that you deploy using Vercel.
+   
+   .. card::
+      :headline: Azure
+      :url: https://www.mongodb.com/docs/atlas/reference/partner-integrations/azure/
+      :icon: atlas_integration
+      :icon-alt: Azure LogoMark
+
+      Learn about the integration between MongoDB Atlas and Microsoft Azure.
+
+Visualization
+-------------
+
+.. card-group::
+   :columns: 2
+   :style: extra-compact
+
+   .. card::
+      :headline: Compass
+      :url: https://www.mongodb.com/docs/compass/current/
+      :icon: mdb_compass
+      :icon-alt: Compass LogoMark
+
+      Visually explore your data with full CRUD functionality, and index and
+      performance management.
+
+   .. card::
+      :headline: Atlas Charts
+      :url: https://www.mongodb.com/docs/charts/
+      :icon: atlas_charts
+      :icon-alt: Atlas Charts LogoMark
+
+      Create, share, and embed visualizations of MongoDB data.
