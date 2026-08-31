@@ -1,170 +1,44 @@
-:noprevnext:
+# Atlas Architecture Center
 
-=========================
-{+atlas-arch-center+}
-=========================
+The Atlas Architecture Center provides guidance on how to build a robust data platform in Atlas. This guidance draws from real-world best practices adopted by hundreds of large enterprises running Atlas in production. While the [Atlas documentation](/) provides information about how to use Atlas, the Atlas Architecture Center gives recommendations on the specific configurations you should use to optimize governance, security, automation, and more. The Atlas Architecture Center's content aligns with the Atlas [Well-Architected Framework](https://www.mongodb.com/resources/products/capabilities/well-architected-framework) pillars:
 
-.. default-domain:: mongodb
+!["An image representing MongoDB Atlas supported by the Atlas Well-Architected Framework pillars."](/includes/images/landing-image.svg)
 
-* goal
-  * best practices to use MongoDB | enterprise environments
-    * scalable,
-    * secure,
-    * resilient
-  * MongoDB
-    * architecture fundamentals,
-    * capabilities,
-    * reference architectures
+- **Operational Efficiency**: Automation, monitoring, and observability that enhance efficiency.
+- **Security**: Network settings, access control, and more to safeguard data integrity and privacy.
+- **Reliability**: High availability, backups, and more to minimize downtime and prevent data loss.
+- **Performance**: Built-in vertical and horizontal scaling to meet increased demand without over-provisioning.
+- **Cost Optimization**: Visibility and cost management while maintaining performance.
 
-The {+atlas-arch-center+} provides guidance on how to build a robust
-data platform in {+service+}. This guidance draws from real-world best
-practices adopted by hundreds of large enterprises running {+service+}
-in production.
+*Next Steps*
 
-While the :atlas:`{+service+} documentation 
-</>` provides information about how to use {+service+}, the 
-{+atlas-arch-center+} gives recommendations on the specific 
-configurations you should use to optimize governance, security,
-automation, and more.
+## Get Started with the Atlas Architecture Center
 
-The {+atlas-arch-center+}'s content aligns with the {+service+} {+waf+}
-pillars:
+Explore the following resources to get started with Atlas and the Atlas Architecture Center.
 
-.. image:: /includes/images/landing-image.svg
-   :alt: "An image representing MongoDB Atlas supported by the Atlas Well-Architected Framework pillars."
-   :width: 600px
-   :align: center
+- [Landing Zone Design](https://mongodb.com/docs/atlas/architecture/landing-zone/) — Learn how to define a landing zone for your organization.
+- [Deployment Paradigms](https://mongodb.com/docs/atlas/architecture/deployment-paradigms/) — Choose your deployment paradigm, such as a multi-region, global, or hybrid deployment.
+- [Orgs, Projects, and Clusters](https://mongodb.com/docs/atlas/architecture/hierarchy/) — Set up the foundational Atlas components.
+- [Migration](https://mongodb.com/docs/atlas/architecture/migration/) — Select a method for migrating to Atlas by leveraging a variety of our tools and procedures.
+- [Operational Readiness Checklist](https://mongodb.com/docs/atlas/architecture/operational-readiness-checklist/) — Use a checklist to help you prepare for a deployment.
 
-|
+## Learn Best Practices for Atlas
 
-- **Operational Efficiency**: Automation, monitoring, and observability
-  that enhance efficiency.
-- **Security**: Network settings, access control, and more to
-  safeguard data integrity and privacy.
-- **Reliability**: High availability, backups, and more
-  to minimize downtime and prevent data loss.
-- **Performance**: Built-in vertical and horizontal scaling to meet
-  increased demand without over-provisioning.
-- **Cost Optimization**: Visibility and cost management while
-  maintaining performance.
+Find features and best practices for each Atlas [Well-Architected Framework](https://www.mongodb.com/resources/products/capabilities/well-architected-framework) pillar.
 
-.. kicker:: Next Steps
+- [Operational Efficiency](https://mongodb.com/docs/atlas/architecture/operational-efficiency/) — Automation, monitoring, and alerting features and best practices.
+- [Security](https://mongodb.com/docs/atlas/architecture/security/) — Network security, authentication, encryption, compliance, and auditing features and best practices.
+- [Reliability](https://mongodb.com/docs/atlas/architecture/reliability/) — High availability, resiliency, backups, and disaster recovery features and best practices.
+- [Performance](https://mongodb.com/docs/atlas/architecture/performance/) — Vertical and horizontal scalability features and best practices.
+- [Cost Optimization](https://mongodb.com/docs/atlas/architecture/cost-optimization/) — Cost-saving configurations and billing data features and best practices.
+- [Migration](https://mongodb.com/docs/atlas/architecture/migration/) — Make a plan to move your existing data into Atlas.
 
-Get Started with the {+atlas-arch-center+}
---------------------------------------------------
-
-Explore the following resources to get started with |service| and the
-{+atlas-arch-center+}.
-
-.. card-group::
-   :columns: 2
-   :style: extra-compact
-
-   .. card::
-      :headline: Landing Zone Design
-      :url: https://mongodb.com/docs/atlas/architecture/landing-zone/
-      :icon: general_features_support
-      :icon-alt: General feature support icon
-
-      Learn how to define a landing zone for your organization.
-
-   .. card::
-      :headline: Deployment Paradigms
-      :url: https://mongodb.com/docs/atlas/architecture/deployment-paradigms/
-      :icon: cloud_global
-      :icon-alt:  icon
-
-      Choose your deployment paradigm, such as a multi-region, global, or hybrid deployment.
-
-   .. card::
-      :headline: Orgs, Projects, and Clusters
-      :url: https://mongodb.com/docs/atlas/architecture/hierarchy/
-      :icon: general_features_global_clusters
-      :icon-alt: Atlas global cluster icon
-
-      Set up the foundational {+service+} components.
-
-   .. card::
-      :headline: Migration
-      :url: https://mongodb.com/docs/atlas/architecture/migration/
-      :icon: mdb_live_migration
-      :icon-alt:  icon 
-
-      Select a method for migrating to |service| by leveraging a 
-      variety of our tools and procedures.
-
-   .. card::
-      :headline: Operational Readiness Checklist
-      :url: https://mongodb.com/docs/atlas/architecture/operational-readiness-checklist/
-      :icon: general_action_audit
-      :icon-alt:  icon
-
-      Use a checklist to help you prepare for a deployment.
-
-Learn Best Practices for {+service+}
-------------------------------------
-
-Find features and best practices for each {+service+} {+waf+} pillar.
-
-.. card-group::
-   :columns: 2
-   :style: extra-compact
-
-   .. card::
-      :headline: Operational Efficiency
-      :url: https://mongodb.com/docs/atlas/architecture/operational-efficiency/
-      :icon: mdb_automation
-      :icon-alt: Automation icon
-
-      Automation, monitoring, and alerting features and best practices.
-
-   .. card::
-      :headline: Security
-      :url: https://mongodb.com/docs/atlas/architecture/security/
-      :icon: general_security
-      :icon-alt: Security icon
-
-      Network security, authentication, encryption, compliance, and auditing features and best practices.
-
-   .. card::
-      :headline: Reliability
-      :url: https://mongodb.com/docs/atlas/architecture/reliability/
-      :icon: general_security
-      :icon-alt: High availability icon
-
-      High availability, resiliency, backups, and disaster recovery features and best practices.
-
-   .. card::
-      :headline: Performance
-      :url: https://mongodb.com/docs/atlas/architecture/performance/
-      :icon: mdb_sharding
-      :icon-alt: Sharding icon
-
-      Vertical and horizontal scalability features and best practices.
-
-   .. card::
-      :headline: Cost Optimization
-      :url: https://mongodb.com/docs/atlas/architecture/cost-optimization/
-      :icon: general_alert_high_cost
-      :icon-alt: Alert for high cost icon
-
-      Cost-saving configurations and billing data features and best practices.
-   
-   .. card::
-      :headline: Migration
-      :url: https://mongodb.com/docs/atlas/architecture/migration/
-
-      Make a plan to move your existing data into {+service+}.
-
-.. toctree::
-   :titlesonly:
-
-   Getting Started </getting-started>
-   Operational Efficiency </operational-efficiency>
-   Security </security>
-   Reliability </reliability>
-   Performance </performance>
-   Cost Optimization </cost-optimization>
-   Solutions Library </solutions-library>
-   Partners Library: Purple Fabric </partners-library/intellectai-purple-fabric.txt>
-   Release Notes </release-notes>
+- [Getting Started](/getting-started)
+- [Operational Efficiency](/operational-efficiency)
+- [Security](/security)
+- [Reliability](/reliability)
+- [Performance](/performance)
+- [Cost Optimization](/cost-optimization)
+- [Solutions Library](/solutions-library)
+- [Partners Library: Purple Fabric](/partners-library/intellectai-purple-fabric.txt)
+- [Release Notes](/release-notes)
