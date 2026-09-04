@@ -1,8 +1,18 @@
 # Atlas Architecture Center
 
-The Atlas Architecture Center provides guidance on how to build a robust data platform in Atlas. This guidance draws from real-world best practices adopted by hundreds of large enterprises running Atlas in production. While the [Atlas documentation](/) provides information about how to use Atlas, the Atlas Architecture Center gives recommendations on the specific configurations you should use to optimize governance, security, automation, and more. The Atlas Architecture Center's content aligns with the Atlas [Well-Architected Framework](https://www.mongodb.com/resources/products/capabilities/well-architected-framework) pillars:
+* goal
+  * how to build a robust data platform | Atlas
+    * != [atlas](../../../atlas)
+      * == how to use Atlas
 
-!["An image representing MongoDB Atlas supported by the Atlas Well-Architected Framework pillars."](/includes/images/landing-image.svg)
+* Atlas Architecture Center
+  * provides
+    * recommendations -- to -- optimize governance + security + automation + ...
+  * 's design
+    * follow [Well-Architected Framework](https://www.mongodb.com/resources/products/capabilities/well-architected-framework) pillars
+        TODO: check Where I can find it the source code 
+
+!["An image representing MongoDB Atlas supported by the Atlas Well-Architected Framework pillars."](includes/images/landing-image.svg)
 
 - **Operational Efficiency**: Automation, monitoring, and observability that enhance efficiency.
 - **Security**: Network settings, access control, and more to safeguard data integrity and privacy.
