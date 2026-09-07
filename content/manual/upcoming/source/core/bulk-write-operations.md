@@ -1,22 +1,6 @@
-.. _bulk-write-operations:
+# Bulk Write Operations
 
-=====================
-Bulk Write Operations
-=====================
-
-.. meta::
-   :description: Perform bulk write operations in MongoDB using bulkWrite() for insert, update, and delete actions, with options for ordered or unordered execution.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-Overview
---------
+## Overview
 
 MongoDB provides clients the ability to perform write operations in
 bulk. Starting in MongoDB 8.0, you can perform bulk write operations across
@@ -25,28 +9,25 @@ earlier than MongoDB 8.0, you can perform bulk write operations on a single
 collection.
 
 To perform bulk write operations across multiple databases and
-collections in MongoDB 8.0, use the :dbcommand:`bulkWrite` 
-database command or the :method:`Mongo.bulkWrite()` ``mongosh`` method.
+collections in MongoDB 8.0, use the `bulkWrite`
+database command or the `Mongo.bulkWrite()` `mongosh` method.
 
 To perform bulk write operations on a single collection,
-use the :method:`db.collection.bulkWrite()` ``mongosh`` method. If you are
-running MongoDB 8.0 or later, you can also use :dbcommand:`bulkWrite` or
-:method:`Mongo.bulkWrite()` to write to a single collection.
+use the `db.collection.bulkWrite()` `mongosh` method. If you are
+running MongoDB 8.0 or later, you can also use `bulkWrite` or
+`Mongo.bulkWrite()` to write to a single collection.
 
-.. _bulk-write-operations-ordered-vs-unordered:
+## Ordered vs Unordered Operations
 
-Ordered vs Unordered Operations
--------------------------------
-
-You can set your bulk write operations to be either *ordered* or *unordered*. 
+You can set your bulk write operations to be either *ordered* or *unordered*.
 
 With an ordered list of operations, MongoDB executes the operations serially.
 If an error occurs during the processing of one of the write
 operations, MongoDB returns without processing any remaining write
-operations in the list. 
+operations in the list.
 
 With an unordered list of operations, MongoDB can execute the
-operations in parallel, but this behavior is not guaranteed. 
+operations in parallel, but this behavior is not guaranteed.
 If an error occurs during the processing of one
 of the write operations, MongoDB will continue to process remaining
 write operations in the list.
@@ -57,12 +38,11 @@ ordered list, each operation must wait for the previous operation to
 finish.
 
 By default, all bulk write commands and methods perform ordered operations.
-To specify unordered operations, set the ``ordered`` option to ``false`` when you
-call your preferred command or method. To learn more about the syntax of 
+To specify unordered operations, set the `ordered` option to `false` when you
+call your preferred command or method. To learn more about the syntax of
 each command or method, see their pages linked above.
 
-Bulk Write Methods
-------------------
+## Bulk Write Methods
 
 All bulk write methods and commands support the following write operations:
 
@@ -74,57 +54,42 @@ All bulk write methods and commands support the following write operations:
 - Delete Many
 
 When you call your preferred command or method, you pass each write
-operation as a document in an array. To learn more about the syntax of 
+operation as a document in an array. To learn more about the syntax of
 each command or method, see their pages linked above.
 
-Example
--------
+## Example
 
-``db.collection.bulkWrite()``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### `db.collection.bulkWrite()`
 
-.. include:: /includes/pizza-bulk-write-example.rst
+For more examples, see db.collection.bulkWrite() Examples.
 
-For more examples, see :ref:`db.collection.bulkWrite() Examples
-<bulkwrite-example-bulk-write-operation>`.
+### `Mongo.bulkWrite()`
 
-``Mongo.bulkWrite()``
-~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/reference/mongo-bulkwrite-example.rst
-
-.. _bulk-write-sharded-collection:
-
-Strategies for Bulk Inserts to a Sharded Collection
----------------------------------------------------
+## Strategies for Bulk Inserts to a Sharded Collection
 
 Large bulk insert operations, including initial data inserts or routine
-data import, can affect :term:`sharded cluster` performance. For
+data import, can affect sharded cluster performance. For
 bulk inserts, consider the following strategies:
 
-Pre-Split the Collection
-~~~~~~~~~~~~~~~~~~~~~~~~
+### Pre-Split the Collection
 
 If your sharded collection is empty and you are not using hashed
 sharding for the first key of your shard key, then your collection has
-only one initial :term:`chunk`, which resides on a single shard. MongoDB
+only one initial chunk, which resides on a single shard. MongoDB
 must then take time to receive data and distribute chunks to
 the available shards. To avoid this performance cost, pre-split the
-collection by :ref:`creating ranges in a sharded cluster
-<create-ranges-in-a-sharded-cluster>`.
+collection by creating ranges in a sharded cluster.
 
-Unordered Writes to ``mongos``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Unordered Writes to `mongos`
 
 To improve write performance to sharded clusters, perform an unordered
-bulk write by setting ``ordered`` to ``false`` when you call your
-preferred method or command. :binary:`~bin.mongos` can attempt to send the writes to 
+bulk write by setting `ordered` to `false` when you call your
+preferred method or command. `mongos` can attempt to send the writes to
 multiple shards simultaneously. For *empty* collections,
 first pre-split the collection as described in
-:doc:`/tutorial/split-chunks-in-sharded-cluster`.
+/tutorial/split-chunks-in-sharded-cluster.
 
-Avoid Monotonic Throttling
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Avoid Monotonic Throttling
 
 If your shard key increases monotonically during an insert, then all
 inserted data goes to the last chunk in the collection, which will
@@ -138,32 +103,31 @@ consider the following modifications to your application:
 - Reverse the binary bits of the shard key. This preserves the
   information and avoids correlating insertion order with increasing
   sequence of values.
-
 - Swap the first and last 16-bit words to "shuffle" the inserts.
 
-.. example:: The following example, in C++, swaps the leading and
-   trailing 16-bit word of :term:`BSON` :term:`ObjectIds <ObjectId>`
-   generated so they are no longer monotonically increasing.
+> **Example The following example, in C++, swaps the leading and**
+>
+> trailing 16-bit word of BSON ObjectIds
+> generated so they are no longer monotonically increasing.
+>
+> ```cpp
+using namespace mongo;
+OID make_an_id() {
+  OID x = OID::gen();
+  const unsigned char *p = x.getData();
+  swap( (unsigned short&) p[0], (unsigned short&) p[10] );
+  return x;
+}
 
-   .. code-block:: cpp
+void foo() {
+  // create an object
+  BSONObj o = BSON( "_id" << make_an_id() << "x" << 3 << "name" << "jane" );
+  // now we may insert o into a sharded collection
+}
+```
 
-      using namespace mongo;
-      OID make_an_id() {
-        OID x = OID::gen();
-        const unsigned char *p = x.getData();
-        swap( (unsigned short&) p[0], (unsigned short&) p[10] );
-        return x;
-      }
-
-      void foo() {
-        // create an object
-        BSONObj o = BSON( "_id" << make_an_id() << "x" << 3 << "name" << "jane" );
-        // now we may insert o into a sharded collection
-      }
-
-.. seealso::
-
-   :ref:`sharding-shard-key` for information
-   on choosing a sharded key. Also see :ref:`Shard Key
-   Internals <sharding-internals-shard-keys>` (in particular,
-   :ref:`sharding-internals-operations-and-reliability`).
+> **See also**
+>
+> sharding-shard-key for information
+> on choosing a sharded key. Also see Shard Key Internals (in particular,
+> sharding-internals-operations-and-reliability).

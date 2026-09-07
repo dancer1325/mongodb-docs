@@ -1,186 +1,139 @@
-.. _production-considerations:
-
-=========================
-Production Considerations
-=========================
-
-.. meta::
-   :description: Consider transaction availability, feature compatibility, runtime limits, and oplog size when running transactions on replica sets or sharded clusters.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: twocols
+# Production Considerations
 
 The following page lists some production considerations for running
 transactions. These apply whether you run transactions on replica sets
 or sharded clusters. For running transactions on sharded clusters, see
-also the :doc:`/core/transactions-sharded-clusters` for additional
+also the /core/transactions-sharded-clusters for additional
 considerations that are specific to sharded clusters.
 
-Availability
-------------
+## Availability
 
-- MongoDB :term:`standalone` deployments do not support transactions. 
-  To use transactions, your deployment must be a multiple node 
+- MongoDB standalone deployments do not support transactions.
+  To use transactions, your deployment must be a multiple node
   replica set.
-
 - MongoDB supports multi-document transactions on replica sets.
-
-- Distributed transactions add support for multi-document transactions on 
+- Distributed transactions add support for multi-document transactions on
   sharded clusters and incorporates the existing support for
   multi-document transactions on replica sets.
 
-.. note:: Distributed Transactions and Multi-Document Transactions
+> **Note Distributed Transactions and Multi-Document Transactions**
+>
+> The two terms are synonymous. Distributed transactions refer to
+> multi-document transactions on sharded clusters and replica sets.
+> Multi-document transactions (whether on sharded clusters or replica sets) are
+> also known as distributed transactions.
 
-   The two terms are synonymous. Distributed transactions refer to 
-   multi-document transactions on sharded clusters and replica sets. 
-   Multi-document transactions (whether on sharded clusters or replica sets) are 
-   also known as distributed transactions.
+## Feature Compatibility
 
-Feature Compatibility
----------------------
-
-To use transactions, the :ref:`featureCompatibilityVersion <view-fcv>`
+To use transactions, the featureCompatibilityVersion
 for all members of the deployment must be at least:
 
-.. list-table::
-   :header-rows: 1
+- - Deployment
+  - Minimum `featureCompatibilityVersion`
+- - Replica Set
+  - `4.0`
 
-   * - Deployment
-     - Minimum ``featureCompatibilityVersion``
-     
-   * - Replica Set
-     - ``4.0`` 
-     
-   * - Sharded Cluster
-     - ``4.2``
+\* - Sharded Cluster  
+- `4.2`
 
 To check the FCV for a member, connect to the member and run the
 following command:
 
-.. code-block:: javascript
+```javascript
+db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
 
-   db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
+```
 
 For more information, see the
-:dbcommand:`setFeatureCompatibilityVersion` reference page.
+`setFeatureCompatibilityVersion` reference page.
 
-.. _transaction-limit:
+## Runtime Limit
 
-Runtime Limit
--------------
-
-.. note::
-   
-   To configure maximum transaction lifetimes in {+atlas+},
-   see :atlas:`Set Transaction Lifetime </cluster-additional-settings/#set-transaction-lifetime>` 
-   in the Atlas documentation.
+> **Note**
+>
+> To configure maximum transaction lifetimes in {+atlas+},
+> see Set Transaction Lifetime
+> in the Atlas documentation.
 
 By default, a transaction must have a runtime of less than one minute.
 You can modify this limit using
-:parameter:`transactionLifetimeLimitSeconds` for the
-:binary:`~bin.mongod` instances. For sharded clusters, the parameter
+`transactionLifetimeLimitSeconds` for the
+`mongod` instances. For sharded clusters, the parameter
 must be modified for all shard replica set members. Transactions that
 exceeds this limit are considered expired and will be aborted by a
 periodic cleanup process.
 
-For sharded clusters, you can also specify a ``maxTimeMS`` limit on
-``commitTransaction``. For more information, see :ref:`Sharded Clusters
-Transactions Time Limit <transactions-sharded-clusters-time-limit>`.
+For sharded clusters, you can also specify a `maxTimeMS` limit on
+`commitTransaction`. For more information, see Sharded Clusters Transactions Time Limit.
 
-.. _txn-oplog-size-limit:
+## Oplog Size Limit
 
-Oplog Size Limit
-----------------
-
-MongoDB creates as many oplog entries as necessary to the encapsulate all write 
-operations in a transaction, instead of a single entry for all write operations 
-in the transaction. This removes the 16MB total size limit for a transaction 
-imposed by the single oplog entry for all its write operations. Although the 
+MongoDB creates as many oplog entries as necessary to the encapsulate all write
+operations in a transaction, instead of a single entry for all write operations
+in the transaction. This removes the 16MB total size limit for a transaction
+imposed by the single oplog entry for all its write operations. Although the
 total size limit is removed, each oplog entry still must be within the
 BSON document size limit of 16MB.
 
-WiredTiger Cache
-----------------
+## WiredTiger Cache
 
 To prevent storage cache pressure from negatively impacting the
 performance:
 
 - When you abandon a transaction, abort the transaction.
-
 - When you encounter an error during individual operation in the
   transaction, abort and retry the transaction.
 
-The :parameter:`transactionLifetimeLimitSeconds` also ensures that
+The `transactionLifetimeLimitSeconds` also ensures that
 expired transactions are aborted periodically to relieve storage cache
 pressure.
 
-.. note::
+> **Note**
+>
+> If you have an uncommitted transaction that causes excessive pressure
+> on the WiredTiger cache, the transaction
+> aborts and returns a write conflict error.
+>
+> If a transaction is too large to ever fit in the WiredTiger cache,
+> the transaction aborts and returns a `TransactionTooLargeForCache`
+> error.
 
-   If you have an uncommitted transaction that causes excessive pressure
-   on the :ref:`WiredTiger cache <storage-wiredtiger>`, the transaction
-   aborts and returns a :term:`write conflict` error.
+## Transactions and Security
 
-   If a transaction is too large to ever fit in the WiredTiger cache,
-   the transaction aborts and returns a ``TransactionTooLargeForCache``
-   error.
-
-Transactions and Security
--------------------------
-
-- If running with :ref:`access control <authorization>`, you must
-  have :ref:`privileges <built-in-roles>` for the
-  :ref:`operations in the transaction <transactions-operations>`.
-
-- If running with :ref:`auditing <auditing>`, operations in an
+- If running with access control, you must
+  have privileges for the
+  operations in the transaction.
+- If running with auditing, operations in an
   aborted transaction are still audited. However, there is no audit
   event that indicates that the transaction aborted.
 
-.. _transactions-disabled-wcmajority:
+## Shard Configuration Restriction
 
-Shard Configuration Restriction
--------------------------------
+## Sharded Clusters and Arbiters
 
-.. include:: /includes/extracts/transactions-shards-wcmajority-disabled.rst
+## Acquiring Locks
 
-Sharded Clusters and Arbiters
------------------------------
-
-.. include:: /includes/extracts/transactions-arbiters.rst
-
-.. _txns-locks:
-
-Acquiring Locks
----------------
-
-By default, transactions wait up to ``5`` milliseconds to acquire locks
+By default, transactions wait up to `5` milliseconds to acquire locks
 required by the operations in the transaction. If the transaction
-cannot acquire its required locks within the ``5`` milliseconds, the
+cannot acquire its required locks within the `5` milliseconds, the
 transaction aborts.
 
 Transactions release all locks upon abort or commit.
 
-.. include:: /includes/extracts/transactions-operations-catalog-tip.rst
+### Lock Request Timeout
 
-Lock Request Timeout
-~~~~~~~~~~~~~~~~~~~~
+> **Note**
+>
+> {+atlas+} clusters restrict the use of the `setParameter`
+> command. For more information, see unsupported-commands in
+> the Atlas documentation.
+>
+> To modify your Atlas cluster parameters, contact
+> Atlas Support.
 
-.. note::
-   
-   {+atlas+} clusters restrict the use of the :dbcommand:`setParameter` 
-   command. For more information, see :ref:`<unsupported-commands>` in 
-   the Atlas documentation.
-
-   To modify your Atlas cluster parameters, contact 
-   :atlas:`Atlas Support </support>`.
-
-You can use the :parameter:`maxTransactionLockRequestTimeoutMillis`
+You can use the `maxTransactionLockRequestTimeoutMillis`
 parameter to adjust how long transactions wait to acquire locks.
-Increasing :parameter:`maxTransactionLockRequestTimeoutMillis` allows
+Increasing `maxTransactionLockRequestTimeoutMillis` allows
 operations in the transactions to wait the specified time to acquire
 the required locks. This can help obviate transaction aborts on
 momentary concurrent lock acquisitions, like fast-running metadata
@@ -188,117 +141,93 @@ operations. However, this could possibly delay the abort of deadlocked
 transaction operations.
 
 You can also use operation-specific timeout by setting
-:parameter:`maxTransactionLockRequestTimeoutMillis` to ``-1``.
+`maxTransactionLockRequestTimeoutMillis` to `-1`.
 
-.. _txn-prod-considerations-ddl:
-
-Pending DDL Operations and Transactions
----------------------------------------
+## Pending DDL Operations and Transactions
 
 If a multi-document transaction is in progress, new DDL operations that
 affect the same database(s) or collection(s) wait behind the
 transaction. While these pending DDL operations exist, new transactions
 that access the same database(s) or collection(s) as the pending DDL
 operations cannot obtain the required locks and and will abort after
-waiting :parameter:`maxTransactionLockRequestTimeoutMillis`. In
-addition, new non-transaction operations that access the same 
-database(s) or collection(s) will block until they reach their 
-``maxTimeMS`` limit.
+waiting `maxTransactionLockRequestTimeoutMillis`. In
+addition, new non-transaction operations that access the same
+database(s) or collection(s) will block until they reach their
+`maxTimeMS` limit.
 
 Consider the following scenarios:
 
-DDL Operation That Requires a Collection Lock
-  While an in-progress transaction is performing various CRUD operations
-  on the ``employees`` collection in the ``hr`` database, an
-  administrator issues the :method:`db.collection.createIndex()` DDL
-  operation against the ``employees`` collection.
-  :method:`~db.collection.createIndex()` requires an exclusive
-  collection lock on the collection.
+DDL Operation That Requires a Collection Lock  
+While an in-progress transaction is performing various CRUD operations
+on the `employees` collection in the `hr` database, an
+administrator issues the `db.collection.createIndex()` DDL
+operation against the `employees` collection.
+`createIndex()` requires an exclusive
+collection lock on the collection.
 
-  Until the in-progress transaction completes, the
-  :method:`~db.collection.createIndex()` operation must wait to obtain
-  the lock. Any new transaction that affects the ``employees``
-  collection and starts while the :method:`~db.collection.createIndex()`
-  is pending must wait until after 
-  :method:`~db.collection.createIndex()` completes. 
+Until the in-progress transaction completes, the
+`createIndex()` operation must wait to obtain
+the lock. Any new transaction that affects the `employees`
+collection and starts while the `createIndex()`
+is pending must wait until after
+`createIndex()` completes.
 
-  The pending :method:`~db.collection.createIndex()` DDL operation does
-  not affect transactions on other collections in the ``hr`` database.
-  For example, a new transaction on the ``contractors`` collection in
-  the ``hr`` database can start and complete as normal.
+The pending `createIndex()` DDL operation does
+not affect transactions on other collections in the `hr` database.
+For example, a new transaction on the `contractors` collection in
+the `hr` database can start and complete as normal.
 
 DDL Operation That Requires a Database Lock  
-  While an in-progress transaction is performing various CRUD operations
-  on the ``employees`` collection in the ``hr`` database, an
-  administrator issues the :dbcommand:`renameCollection` DDL operation 
-  to rename the ``vendors.contractors`` collection to 
-  ``hr.contractors``. ``renameCollection`` requires a database lock on 
-  the target database (``hr``) when it differs from the source database 
-  (``vendors``).
+While an in-progress transaction is performing various CRUD operations
+on the `employees` collection in the `hr` database, an
+administrator issues the `renameCollection` DDL operation
+to rename the `vendors.contractors` collection to
+`hr.contractors`. `renameCollection` requires a database lock on
+the target database (`hr`) when it differs from the source database
+(`vendors`).
 
-  Until the in-progress transaction completes, the 
-  ``renameCollection`` operation must wait to obtain the 
-  lock. Any new transaction that affects the ``hr`` database or *any* 
-  of its collections and starts while the ``renameCollection`` is 
-  pending must wait until after ``renameCollection`` completes.
+Until the in-progress transaction completes, the
+`renameCollection` operation must wait to obtain the
+lock. Any new transaction that affects the `hr` database or *any*
+of its collections and starts while the `renameCollection` is
+pending must wait until after `renameCollection` completes.
 
 In either scenario, if the DDL operation remains pending for more than
-:parameter:`maxTransactionLockRequestTimeoutMillis`, pending
-transactions waiting behind that operation abort. That is, the value of 
-:parameter:`maxTransactionLockRequestTimeoutMillis` must at least cover
+`maxTransactionLockRequestTimeoutMillis`, pending
+transactions waiting behind that operation abort. That is, the value of
+`maxTransactionLockRequestTimeoutMillis` must at least cover
 the time required for the in-progress transaction *and* the pending DDL
 operation to complete.
 
-.. seealso::
+> **See also**
+>
+> - transactions-write-conflicts
+> - transactions-stale-reads
+> - faq-concurrency-database-lock
+>
+> \- faq-concurrency-collection-lock
 
-   - :ref:`transactions-write-conflicts`
-   
-   - :ref:`transactions-stale-reads`
+## In-progress Transactions and Write Conflicts
 
-   - :ref:`faq-concurrency-database-lock`
+> **See also**
+>
+> - txns-locks
+> - txn-prod-considerations-ddl
+>
+> \- `\$currentOp output`
 
-   - :ref:`faq-concurrency-collection-lock`
+## In-progress Transactions and Stale Reads
 
-.. _transactions-write-conflicts:
+## In-progress Transactions and Chunk Migration
 
-In-progress Transactions and Write Conflicts
---------------------------------------------
+> **See also**
+>
+> `shardingStatistics.countDonorMoveChunkLockTimeout`
 
-.. include:: /includes/extracts/transactions-write-conflict.rst
+## Outside Reads During Commit
 
-.. seealso::
+## Additional Information
 
-   - :ref:`txns-locks`
-   - :ref:`txn-prod-considerations-ddl`
-   - :data:`$currentOp output <$currentOp.prepareReadConflicts>`
-
-.. _transactions-stale-reads:
-
-In-progress Transactions and Stale Reads
-----------------------------------------
-
-.. include:: /includes/extracts/transactions-stale-reads.rst
-
-In-progress Transactions and Chunk Migration
---------------------------------------------
-
-.. include:: /includes/extracts/transactions-chunk-migration.rst
-
-.. seealso::
-
-   :serverstatus:`shardingStatistics.countDonorMoveChunkLockTimeout`
-
-
-.. _transactions-prod-consideration-outside-reads:
-
-Outside Reads During Commit
----------------------------
-
-.. include:: /includes/extracts/transactions-multi-shard-block-external-reads.rst
-
-Additional Information
-----------------------
-
-.. seealso::
-
-   :doc:`/core/transactions-sharded-clusters`
+> **See also**
+>
+> /core/transactions-sharded-clusters

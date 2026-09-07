@@ -1,161 +1,83 @@
-.. _crud:
-
-=======================
-MongoDB CRUD Operations
-=======================
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-.. meta:: 
-   :description: Manage documents in collections by running create, read, update, and delete operations.
-   :keywords: atlas
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-.. dismissible-skills-card::
-   :skill: CRUD Operations
-   :url: https://learn.mongodb.com/skills?openTab=query
+# MongoDB CRUD Operations
 
 CRUD operations *create*, *read*, *update*, and *delete*
-:ref:`documents <bson-document-format>`.
+documents.
 
 You can connect with driver methods and perform CRUD operations
 for deployments hosted in the following environments:
 
-.. |page-topic| replace:: :atlas:`perform CRUD operations in the UI </atlas-ui/documents>`
+## Create Operations
 
-.. cta-banner::
-   :url: https://www.mongodb.com/docs/atlas/atlas-ui/documents
-   :icon: Cloud
-
-   .. include:: /includes/fact-atlas-compatible.rst
-
-
-Create Operations
------------------
-
-Create or insert operations add new :ref:`documents
-<bson-document-format>` to a :ref:`collection <collections>`. If the
+Create or insert operations add new documents to a collection. If the
 collection does not currently exist, insert operations will create the
 collection.
 
 MongoDB provides the following methods to insert documents into a
 collection:
 
-- :method:`db.collection.insertOne()` 
-- :method:`db.collection.insertMany()` 
+- `db.collection.insertOne()`
+- `db.collection.insertMany()`
 
-In MongoDB, insert operations target a single :term:`collection`. All
-write operations in MongoDB are :doc:`atomic
-</core/write-operations-atomicity>` on the level of a single
-:ref:`document <bson-document-format>`.
+In MongoDB, insert operations target a single collection. All
+write operations in MongoDB are atomic on the level of a single
+document.
 
-.. include:: /images/crud-annotated-mongodb-insertOne.rst
+For examples, see /tutorial/insert-documents.
 
-For examples, see :doc:`/tutorial/insert-documents`.
+## Read Operations
 
-.. _crud-read-operations:
-
-Read Operations
----------------
-
-Read operations retrieve :ref:`documents <bson-document-format>` from a
-:ref:`collection <collections>`; i.e. query a collection for
+Read operations retrieve documents from a
+collection; i.e. query a collection for
 documents. MongoDB provides the following methods to read documents from
 a collection:
 
-- :method:`db.collection.find()`
+- `db.collection.find()`
 
-You can specify :ref:`query filters or criteria
-<read-operations-query-argument>` that identify the documents to return.
-
-.. include:: /images/crud-annotated-mongodb-find.rst
+You can specify query filters or criteria that identify the documents to return.
 
 For examples, see:
 
-- :doc:`/tutorial/query-documents`
+- /tutorial/query-documents
+- /tutorial/query-embedded-documents
+- /tutorial/query-arrays
+- /tutorial/query-array-of-documents
 
-- :doc:`/tutorial/query-embedded-documents`
+## Update Operations
 
-- :doc:`/tutorial/query-arrays`
-
-- :doc:`/tutorial/query-array-of-documents`
-
-Update Operations
------------------
-
-Update operations modify existing :ref:`documents
-<bson-document-format>` in a :ref:`collection <collections>`. MongoDB
+Update operations modify existing documents in a collection. MongoDB
 provides the following methods to update documents of a collection:
 
-- :method:`db.collection.updateOne()` 
-
-- :method:`db.collection.updateMany()` 
-
-- :method:`db.collection.replaceOne()` 
+- `db.collection.updateOne()`
+- `db.collection.updateMany()`
+- `db.collection.replaceOne()`
 
 In MongoDB, update operations target a single collection. All write
-operations in MongoDB are :doc:`atomic
-</core/write-operations-atomicity>` on the level of a single document.
+operations in MongoDB are atomic on the level of a single document.
 
 You can specify criteria, or filters, that identify the documents to
-update. These :ref:`filters <document-query-filter>` use the same
+update. These filters use the same
 syntax as read operations.
 
-.. include:: /images/crud-annotated-mongodb-updateMany.rst
+For examples, see /tutorial/update-documents.
 
-For examples, see :doc:`/tutorial/update-documents`.
-
-Delete Operations
------------------
+## Delete Operations
 
 Delete operations remove documents from a collection. MongoDB provides
 the following methods to delete documents of a collection:
 
-- :method:`db.collection.deleteOne()` 
-- :method:`db.collection.deleteMany()`
+- `db.collection.deleteOne()`
+- `db.collection.deleteMany()`
 
-In MongoDB, delete operations target a single :term:`collection`. All
-write operations in MongoDB are :doc:`atomic
-</core/write-operations-atomicity>` on the level of a single document.
+In MongoDB, delete operations target a single collection. All
+write operations in MongoDB are atomic on the level of a single document.
 
 You can specify criteria, or filters, that identify the documents to
-remove. These :ref:`filters <document-query-filter>` use the same
+remove. These filters use the same
 syntax as read operations.
 
-.. include:: /images/crud-annotated-mongodb-deleteMany.rst
+For examples, see /tutorial/remove-documents.
 
-For examples, see :doc:`/tutorial/remove-documents`.
-
-Bulk Write
-----------
+## Bulk Write
 
 MongoDB provides the ability to perform write operations in bulk. For
-details, see :doc:`/core/bulk-write-operations`.
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Insert </tutorial/insert-documents>
-   Query </tutorial/query-documents>
-   Update </tutorial/update-documents>
-   Remove </tutorial/remove-documents>
-   Bulk Write </core/bulk-write-operations>
-   Retryable Writes </core/retryable-writes>
-   Retryable Reads </core/retryable-reads>
-   SQL to MongoDB </reference/sql-comparison>
-   Natural Language to MongoDB </natural-language-to-mongodb>
-   Text Search </text-search>
-   Geospatial Queries </geospatial-queries>
-   Read Concern </reference/read-concern>
-   Write Concern </reference/write-concern>
-   CRUD Concepts </core/crud>
+details, see /core/bulk-write-operations.

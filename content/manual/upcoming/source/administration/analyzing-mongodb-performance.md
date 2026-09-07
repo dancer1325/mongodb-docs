@@ -1,19 +1,4 @@
-.. _performance:
-
-===================
-MongoDB Performance
-===================
-
-.. meta::
-   :description: Analyze MongoDB performance by examining database access strategies, indexing, schema design, and connection management to address potential issues.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# MongoDB Performance
 
 As you develop and operate applications with MongoDB, you may need to
 analyze the performance of the application and its database.
@@ -23,7 +8,7 @@ connections.
 
 Some users may experience performance limitations as a result of inadequate
 or inappropriate indexing strategies, or as a consequence of poor schema
-design patterns. :ref:`analyzing-performance-locks` discusses how these can
+design patterns. analyzing-performance-locks discusses how these can
 impact MongoDB's internal locking.
 
 Performance issues may indicate that the database is operating at
@@ -32,77 +17,70 @@ database. In particular, the application's working set should fit in
 the available physical memory.
 
 In some cases performance issues may be temporary and related to
-abnormal traffic load. As discussed in :ref:`number-of-connections`, scaling
+abnormal traffic load. As discussed in number-of-connections, scaling
 can help relax excessive traffic.
 
 Database profiling can help you to understand what operations are
 causing degradation.
 
-.. _analyzing-performance-locks:
-
-Locking Performance
--------------------
+## Locking Performance
 
 MongoDB uses a locking system to ensure data set consistency. If
 certain operations are long-running or a queue forms, performance
 will degrade as requests and operations wait for the lock.
 
 Lock-related slowdowns can be intermittent. To see if the lock has been
-affecting your performance, refer to the :ref:`server-status-locks`
-section and the :ref:`globalLock` section of the
-:dbcommand:`serverStatus` output.
+affecting your performance, refer to the server-status-locks
+section and the globalLock section of the
+`serverStatus` output.
 
-.. note::
-   Some ``serverStatus`` response fields are not returned on 
-   {+atlas+} Free clusters or {+flex-clusters+}. For more information, 
-   see :ref:`free-shard-commands-with-limits` in the {+atlas+} 
-   documentation.
+> **Note**
+>
+> Some `serverStatus` response fields are not returned on
+> {+atlas+} Free clusters or {+flex-clusters+}. For more information,
+> see free-shard-commands-with-limits in the {+atlas+}
+> documentation.
 
-Dividing :serverstatus:`locks.<type>.timeAcquiringMicros` by
-:serverstatus:`locks.<type>.acquireWaitCount`
+Dividing `locks.\<type\>.timeAcquiringMicros` by
+`locks.\<type\>.acquireWaitCount`
 can give an approximate average wait time for a particular lock mode.
 
-:serverstatus:`locks.<type>.deadlockCount` provide
+`locks.\<type\>.deadlockCount` provide
 the number of times the lock acquisitions encountered deadlocks.
 
-If :serverstatus:`globalLock.currentQueue.total` is consistently high,
+If `globalLock.currentQueue.total` is consistently high,
 then there is a chance that a large number of requests are waiting for
 a lock. This indicates a possible concurrency issue that may be affecting
 performance.
 
-If :serverstatus:`globalLock.totalTime` is
-high relative to :serverstatus:`uptime`, the database has
+If `globalLock.totalTime` is
+high relative to `uptime`, the database has
 existed in a lock state for a significant amount of time.
 
 Long queries can result from ineffective use of indexes;
 non-optimal schema design; poor query structure; system architecture issues; or
 insufficient RAM resulting in disk reads.
 
-.. _number-of-connections:
-
-Number of Connections
----------------------
+## Number of Connections
 
 In some cases, the number of connections between the applications and the
 database can overwhelm the ability of the server to handle requests. The
-following fields in the :dbcommand:`serverStatus` document can provide insight:
+following fields in the `serverStatus` document can provide insight:
 
-- :serverstatus:`connections` is a container for the following
+- `connections` is a container for the following
   two fields:
-
-  - :serverstatus:`connections.current` the total number of
+  - `connections.current` the total number of
     current clients connected to the database instance.
-
-  - :serverstatus:`connections.available` the total number of
+  - `connections.available` the total number of
     unused connections available for new clients.
 
 If there are numerous concurrent application requests, the database may have
 trouble keeping up with demand. If this is the case,
 increase the capacity of your deployment.
 
-For write-heavy applications, deploy :term:`sharding` and add one or more
-:term:`shards <shard>` to a :term:`sharded cluster` to distribute load among
-:binary:`~bin.mongod` instances.
+For write-heavy applications, deploy sharding and add one or more
+shards to a sharded cluster to distribute load among
+`mongod` instances.
 
 Spikes in the number of connections can also be the result of
 application or driver errors. All of the officially supported MongoDB
@@ -111,29 +89,17 @@ reuse connections more efficiently. An extremely high number of
 connections, particularly without corresponding workload, is often
 indicative of a driver or other configuration error.
 
-Self-Managed Connection Limits
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Self-Managed Connection Limits
 
 Unless constrained by system-wide limits, the maximum number of
 incoming connections supported by MongoDB is configured with the
-:setting:`~net.maxIncomingConnections` setting. On Unix-based systems,
-system-wide limits can be modified using the ``ulimit`` command, or by
-editing your system's ``/etc/sysctl`` file. See :ref:`ulimit`
+`maxIncomingConnections` setting. On Unix-based systems,
+system-wide limits can be modified using the `ulimit` command, or by
+editing your system's `/etc/sysctl` file. See ulimit
 for more information.
 
-{+atlas+} Connection Limits
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### {+atlas+} Connection Limits
 
-{+atlas+} sets the limit for concurrent incoming connections based on 
-the cluster tier and class. To learn more, see :ref:`<connection-limits>` 
+{+atlas+} sets the limit for concurrent incoming connections based on
+the cluster tier and class. To learn more, see connection-limits
 in the Atlas documentation.
-
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Connection Pool </administration/connection-pool-overview>
-   Performance Tuning </administration/performance-tuning>
-   Query </administration/query>
-   Configure Connection Establishment Rate Limiting </tutorial/configure-rate-limiter>

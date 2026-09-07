@@ -1,70 +1,33 @@
-.. _text-search:
-
-===========
-Text Search
-===========
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-.. meta:: 
-   :description: MongoDB offers robust text search capabilities for hosted deployments, include fine-grained indexing and a rich query language.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# Text Search
 
 MongoDB provides different text search capabilities depending on whether
-your data is hosted on :atlas:`MongoDB Atlas </>` or a self-managed
+your data is hosted on MongoDB Atlas or a self-managed
 deployment.
 
-To learn about search on self-hosted deployments, see :ref:`text-search-on-prem`.
+To learn about search on self-hosted deployments, see text-search-on-prem.
 
-{+fts+} 
---------------
+## {+fts+}
 
 To perform text search on data hosted on MongoDB, use
-:atlas:`{+fts+}  </atlas-search>`. {+fts+} supports
+{+fts+}. {+fts+} supports
 fine-grained text indexing and a rich query language for fast, relevant
 search results.
 
-To learn more and get started with {+fts+}, see: 
+To learn more and get started with {+fts+}, see:
 
-- :atlas:`{+fts+} Aggregation Pipeline Stages 
-  </reference/atlas-search/query-syntax/>`
-- :atlas:`Defining {+fts+} Indexes 
-  </reference/atlas-search/index-definitions/>`
-- :atlas:`Running {+fts+} Queries 
-  </reference/atlas-search/searching/>`
+- {+fts+} Aggregation Pipeline Stages
+- Defining {+fts+} Indexes
+- Running {+fts+} Queries
 
-.. include:: /includes/fact-atlas-search-languages.rst
-
-{+avs+}
----------------------------
+## {+avs+}
 
 To perform vector search on your data hosted on MongoDB, use
-:atlas:`{+avs+}
-</atlas-vector-search/vector-search-overview/>`. {+avs+}
+{+avs+}. {+avs+}
 extends your text search capabilities to include semantic, hybrid, and
 generative search.
 
 To learn more and get started with {+avs+}, see:
 
-- :atlas:`{+avs+} Quick Start
-  </atlas-vector-search/tutorials/vector-search-quick-start/>`
-- :atlas:`Atlas Semantic Text Search 
-  </atlas-vector-search/tutorials/vector-search-tutorial/>`
-- :atlas:`Run Vector Search Queries 
-  </atlas-vector-search/vector-search-stage>`
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-   
-   {+fts+} <https://www.mongodb.com/docs/atlas/atlas-search/>
-   {+avs+} <https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/>
+- {+avs+} Quick Start
+- Atlas Semantic Text Search
+- Run Vector Search Queries

@@ -1,309 +1,211 @@
-.. include:: /includes/java-sync-links.rst
-.. include:: /includes/java-async-links.rst
-
-.. _read-operations-arrays:
-
-==============
-Query an Array
-==============
-
-.. facet::
-   :name: programming_language
-   :values: shell, csharp, go, java, javascript/typescript, python, php, ruby, scala, kotlin
-
-.. meta::
-   :description: Learn how to run various examples of query operations on array fields using MongoDB drivers. 
-   :keywords: compass, code example, motor, java sync, java async, reactive streams, node.js, kotlin coroutine
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
+# Query an Array
 
 You can query arrays in MongoDB using the following methods:
 
-.. |atlas-ref| replace:: :ref:`query-array-atlas-ui`
+## Match an Array
 
-.. include:: /includes/fact-methods.rst
-
-.. include:: /includes/language-selector-instructions.rst
-
-.. tabs-selector:: drivers
-
-.. |query_operations| replace:: query operations on array fields
-
-.. include:: /includes/driver-examples/driver-example-query-intro.rst
-
-.. include:: /includes/driver-examples/driver-example-query-20.rst
-
-.. _array-match-exact:
-
-Match an Array
---------------
-
-.. include:: /includes/extracts/filter-equality-array.rst
-
-The following example queries for all documents where the field ``tags``
-value is an array with exactly two elements, ``"red"`` and ``"blank"``,
+The following example queries for all documents where the field `tags`
+value is an array with exactly two elements, `"red"` and `"blank"`,
 in the specified order:
 
-.. include:: /includes/driver-examples/driver-example-query-21.rst
-
 If, instead, you wish to find an array that contains both the elements
-``"red"`` and ``"blank"``, without regard to order or other elements in
-the array, use the :query:`$all` operator:
+`"red"` and `"blank"`, without regard to order or other elements in
+the array, use the `\$all` operator:
 
-.. include:: /includes/driver-examples/driver-example-query-22.rst
+## Query an Array for an Element
 
-.. _array-match-single-element:
-
-Query an Array for an Element
------------------------------
-
-.. include:: /includes/extracts/filter-equality-array-element.rst
-
-The following example queries for all documents where ``tags`` is an
-array that contains the string ``"red"`` as one of its elements:
-
-.. include:: /includes/driver-examples/driver-example-query-23.rst
-
-.. include:: /includes/extracts/filter-query-operators-array.rst
+The following example queries for all documents where `tags` is an
+array that contains the string `"red"` as one of its elements:
 
 For example, the following operation queries for all documents where the array
-``dim_cm`` contains at least one element whose value is greater than
-``25``.
+`dim_cm` contains at least one element whose value is greater than
+`25`.
 
-.. include:: /includes/driver-examples/driver-example-query-24.rst
-
-.. _specify-multiple-criteria-for-array-elements:
-
-Specify Multiple Conditions for Array Elements
-----------------------------------------------
+## Specify Multiple Conditions for Array Elements
 
 When specifying compound conditions on array elements, you can specify
 the query such that either a single array element meets these condition
 or any combination of array elements meets the conditions.
 
-.. _combination-of-elements-satisfies-criteria:
+### Query an Array with Compound Filter Conditions on the Array Elements
 
-Query an Array with Compound Filter Conditions on the Array Elements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The following example queries for documents where the ``dim_cm`` array
+The following example queries for documents where the `dim_cm` array
 contains elements that in some combination satisfy the query
-conditions; e.g., one element can satisfy the greater than ``15``
-condition and another element can satisfy the less than ``20``
+conditions; e.g., one element can satisfy the greater than `15`
+condition and another element can satisfy the less than `20`
 condition, or a single element can satisfy both:
 
-.. include:: /includes/driver-examples/driver-example-query-25.rst
+### Query for an Array Element that Meets Multiple Criteria
 
-.. _single-element-satisfies-criteria:
-
-Query for an Array Element that Meets Multiple Criteria
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Use :query:`$elemMatch` operator to specify multiple criteria on the
+Use `\$elemMatch` operator to specify multiple criteria on the
 elements of an array such that at least one array element satisfies all
 the specified criteria.
 
-The following example queries for documents where the ``dim_cm`` array
-contains at least one element that is both greater than (:query:`$gt`)
-``22`` and less than (:query:`$lt`) ``30``:
+The following example queries for documents where the `dim_cm` array
+contains at least one element that is both greater than (`\$gt`)
+`22` and less than (`\$lt`) `30`:
 
-.. include:: /includes/driver-examples/driver-example-query-26.rst
+### Query for an Element by the Array Index Position
 
-Query for an Element by the Array Index Position
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Using :term:`dot notation`, you can specify query conditions for an
+Using dot notation, you can specify query conditions for an
 element at a particular index or position of the array. The array uses
 zero-based indexing.
 
-.. note::
-
-  When querying using dot notation, the field and nested field must be
-  inside quotation marks.
+> **Note**
+>
+> When querying using dot notation, the field and nested field must be
+> inside quotation marks.
 
 The following example queries for all documents where the second
-element in the array ``dim_cm`` is greater than ``25``:
+element in the array `dim_cm` is greater than `25`:
 
-.. include:: /includes/driver-examples/driver-example-query-27.rst
+### Query an Array by Array Length
 
-Query an Array by Array Length
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Use the :query:`$size` operator to query for arrays by number of
+Use the `\$size` operator to query for arrays by number of
 elements. For example, the following selects documents where the array
-``tags`` has 3 elements.
+`tags` has 3 elements.
 
-.. include:: /includes/driver-examples/driver-example-query-28.rst
+## Query an Array with {+atlas+}
 
-.. _query-array-atlas-ui:
-
-Query an Array with {+atlas+}
----------------------------------
-
-The example in this section uses the :atlas:`sample movies dataset 
-</sample-data/sample-mflix/>`. To learn how to load the sample dataset 
-into your {+atlas+} deployment, see :atlas:`Load Sample Data 
-</sample-data/#std-label-load-sample-data>`.
+The example in this section uses the sample movies dataset. To learn how to load the sample dataset
+into your {+atlas+} deployment, see Load Sample Data.
 
 To query an array in {+atlas+}, follow these steps:
 
-.. procedure:: 
-   :style: normal
+**Navigate to the collection.**
 
-   .. include:: /includes/atlas-nav/steps-db-deployments-page.rst
+**Specify a query filter document.**
 
-   .. step:: Navigate to the collection.
+To query a document that contains an array,
+specify a query filter document.
+A query filter document uses query operators to specify search conditions.
+Use the following example documents to query array fields in the
+`sample_mflix.movies` collection.
 
-      .. include:: /includes/steps-nav-atlas-sample-movies.rst
+To apply a query filter, copy an example document into the
+Filter search bar and click Apply.
 
-   .. step:: Specify a query filter document.
+To specify an equality condition on an array, use the query
+document `{ <field>: <value> }` where `<value>` is
+the exact array to match, including the order of the elements.
+The following example finds documents that have a `genres`
+field that contains the `["Action", "Comedy"]` array in the
+specified order:
 
-      To query a document that contains an array, 
-      specify a :ref:`query filter document <document-query-filter>`.
-      A query filter document uses :ref:`query operators 
-      <csfle-supported-query-operators>` to specify search conditions.
-      Use the following example documents to query array fields in the 
-      ``sample_mflix.movies`` collection.
+```
+{ genres: ["Action", "Comedy"] }
 
-      To apply a query filter, copy an example document into the 
-      :guilabel:`Filter` search bar and click :guilabel:`Apply`.
+```
 
-      .. tabs::
+To find an array that contains both the elements `Action` and
+`Comedy`, without regard to order or other elements
+in the array, use the `\$all` operator:
 
-         .. tab:: Match an Array
-            :tabid: match
+```
+{ genres: { $all: ["Action", "Comedy"] } }
+```
 
-            To specify an equality condition on an array, use the query 
-            document ``{ <field>: <value> }`` where ``<value>`` is 
-            the exact array to match, including the order of the elements.
-            The following example finds documents that have a ``genres``
-            field that contains the ``["Action", "Comedy"]`` array in the 
-            specified order:
-            
-            .. code-block::
+To query if the array field contains at least one element with the
+specified value, use the filter `{ <field>: <value> }` where
+`<value>` is the element value.
 
-               { genres: ["Action", "Comedy"] }
+The following example queries for all documents where the
+`genres` field contains the string `Short` as one
+of its elements:
 
-            To find an array that contains both the elements ``Action`` and
-            ``Comedy``, without regard to order or other elements 
-            in the array, use the :query:`$all` operator:
+```
+{ genres: "Short" }
 
-            .. code-block::
+```
 
-               { genres: { $all: ["Action", "Comedy"] } }
-            
-         .. tab:: Query for an Element
-            :tabid: element
+To specify conditions on the elements in the array field,
+use query operators in the
+query filter document:
 
-            To query if the array field contains at least one element with the 
-            specified value, use the filter ``{ <field>: <value> }`` where 
-            ``<value>`` is the element value.
+```
+{ <array field>: { <operator1>: <value1>, ... } }
 
-            The following example queries for all documents where the
-            ``genres`` field contains the string ``Short`` as one 
-            of its elements:
+```
 
-            .. code-block::
+For example, the following operation uses the
+`\$nin` operator to query for all documents
+where the `genres` field does not contain `Drama`.
 
-               { genres: "Short" }
+```
+{ genres: { $nin: ["Drama"] } }
+```
 
-            To specify conditions on the elements in the array field,
-            use :ref:`query operators <query-selectors>` in the
-            :ref:`query filter document <document-query-filter>`:
+When specifying compound conditions on array elements, you can specify
+the query such that either a single array element meets these condition
+or any combination of array elements meets the conditions.
 
-            .. code-block::
+### Query an Array with Compound Filter Conditions on the Array Elements
 
-               { <array field>: { <operator1>: <value1>, ... } }
+The following example queries for documents where the `cast`
+array contains elements that in some combination satisfy the query
+conditions. For example, the following filter uses the `\$regex`
+and `\$eq` operators to return documents where a single array element
+ends in `Olsen` and another element equals `Mary-Kate Olsen` or
+a single element that satisfies both conditions:
 
-            For example, the following operation uses the
-            :query:`$nin` operator to query for all documents 
-            where the ``genres`` field does not contain ``Drama``.
+```
+{ cast: { $regex: "Olsen$", $eq: "Mary-Kate Olsen" } }
 
-            .. code-block::
+```
 
-               { genres: { $nin: ["Drama"] } }
+This query filter returns movies that include `Mary-Kate Olsen` in
+their cast, and movies that include both `Mary-Kate Olsen` and
+`Ashley Olsen` in their cast.
 
-         .. tab:: Specify Multiple Conditions
-            :tabid: multiple
+### Query for an Array Element that Meets Multiple Criteria
 
-            When specifying compound conditions on array elements, you can specify
-            the query such that either a single array element meets these condition
-            or any combination of array elements meets the conditions.
-                        
-            Query an Array with Compound Filter Conditions on the Array Elements
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Use `\$elemMatch` operator to specify multiple criteria on the
+elements of an array such that at least one array element satisfies all
+the specified criteria.
 
-            The following example queries for documents where the ``cast`` 
-            array contains elements that in some combination satisfy the query
-            conditions. For example, the following filter uses the :query:`$regex`
-            and :query:`$eq` operators to return documents where a single array element 
-            ends in ``Olsen`` and another element equals ``Mary-Kate Olsen`` or 
-            a single element that satisfies both conditions:
+The following example uses the `\$elemMatch` and `\$ne`
+operators to query for documents where the `languages` array contains
+at least one element that is both not `null` and does not equal `English`.
 
-            .. code-block::
+```
+{ languages: { $elemMatch: { $ne: null, $ne: "English" } } }
 
-               { cast: { $regex: "Olsen$", $eq: "Mary-Kate Olsen" } }
+```
 
-            This query filter returns movies that include ``Mary-Kate Olsen`` in
-            their cast, and movies that include both ``Mary-Kate Olsen`` and 
-            ``Ashley Olsen`` in their cast.
+### Query for an Element by the Array Index Position
 
-            Query for an Array Element that Meets Multiple Criteria
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using dot notation, you can specify query conditions for an
+element at a particular index or position of the array. The array uses
+zero-based indexing.
 
-            Use :query:`$elemMatch` operator to specify multiple criteria on the
-            elements of an array such that at least one array element satisfies all
-            the specified criteria.
+> **Note**
+>
+> When querying using dot notation, the field and nested field must be
+> inside quotation marks.
 
-            The following example uses the :query:`$elemMatch` and :query:`$ne` 
-            operators to query for documents where the ``languages`` array contains 
-            at least one element that is both not ``null`` and does not equal ``English``.
+The following example uses the `\$ne` operator to query
+for all documents where the first element in the `countries`
+array is not equal to `USA`:
 
-            .. code-block::
+```
+{ "countries.0": { $ne: "USA" } }
 
-               { languages: { $elemMatch: { $ne: null, $ne: "English" } } }
+```
 
-            Query for an Element by the Array Index Position
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Query an Array by Array Length
 
-            Using :term:`dot notation`, you can specify query conditions for an
-            element at a particular index or position of the array. The array uses
-            zero-based indexing.
+Use the `\$size` operator to query for arrays by number of
+elements. For example, the following selects documents where the array
+`genres` has 3 elements.
 
-            .. note::
+```
+{ genres: { $size: 3 } }
+```
 
-               When querying using dot notation, the field and nested field must be
-               inside quotation marks.
-
-            The following example uses the :query:`$ne` operator to query 
-            for all documents where the first element in the ``countries`` 
-            array is not equal to ``USA``:
-
-            .. code-block::
-
-               { "countries.0": { $ne: "USA" } }
-
-            Query an Array by Array Length
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            Use the :query:`$size` operator to query for arrays by number of
-            elements. For example, the following selects documents where the array
-            ``genres`` has 3 elements.
-
-            .. code-block::
-               
-               { genres: { $size: 3 } }
-      
-Additional Query Tutorials
---------------------------
+## Additional Query Tutorials
 
 For additional query examples, see:
 
-- :doc:`/tutorial/query-documents`
-
-- :doc:`/tutorial/query-embedded-documents`
-
-- :doc:`/tutorial/query-array-of-documents`
+- /tutorial/query-documents
+- /tutorial/query-embedded-documents
+- /tutorial/query-array-of-documents

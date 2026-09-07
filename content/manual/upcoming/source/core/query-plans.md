@@ -1,32 +1,4 @@
-
-.. _read-operations-query-optimization:
-.. _query-plans-query-optimization:
-
-===========
-Query Plans
-===========
-
-.. meta::
-   :description: Understand how MongoDB's query planner selects and caches efficient query plans using available indexes, and learn about plan cache states and management.
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-.. dismissible-skills-card::
-   :skill: Query Optimization
-   :url: https://learn.mongodb.com/skills?openTab=query
-
-.. TODO Consider moving this to the mechanics of the index section
+# Query Plans
 
 For any given query, the MongoDB query planner chooses and caches the
 most efficient query plan given the available indexes. To evaluate the
@@ -36,243 +8,193 @@ that produces the most results during the trial period while performing
 the least amount of work.
 
 The associated plan cache entry is used for subsequent queries with the
-same :term:`plan cache query shape`.
+same plan cache query shape.
 
 The following diagram illustrates the query planner logic:
 
-.. include:: /images/general-query-planner-logic.rst
+## Plan Cache Entry State
 
-.. include:: includes/explain-ignores-cache-plan.rst
-
-.. _cache-entry-state:
-
-Plan Cache Entry State
-----------------------
-
-Each plan cache query shape is associated with one of three states in 
+Each plan cache query shape is associated with one of three states in
 the cache:
 
-.. list-table::
-   :header-rows: 1
-   :widths: 15 85
+- - State
+  - Description
 
-   * - State
-     - Description
-   
-   * - :ref:`Missing <cache-entry-missing>`
-   
-     - .. _cache-entry-missing:
+- - Missing
 
-       No entry for this shape exists in the cache.
-       
-       For a query, if the cache entry state for a plan cache query shape is
-       :ref:`Missing <cache-entry-missing>`:
+  - <div id="cache-entry-missing">
 
-       #. Candidate plans are evaluated and a winning plan is selected.
+    No entry for this shape exists in the cache.
 
-       #. The cache creates an entry for the plan cache query shape in state
-          :ref:`Inactive <cache-entry-inactive>` with a value that
-          quantifies the amount of work required by the plan. 
-       
-   * - :ref:`Inactive <cache-entry-inactive>`
+    </div>
 
-     - .. _cache-entry-inactive:
+    For a query, if the cache entry state for a plan cache query shape is
+    Missing:
 
-       The entry in the cache is a placeholder entry for this shape.
-       That is, the planner has seen the shape, calculated a value that
-       quantifies the amount of work required by the plan and stored the
-       shape placeholder entry but the plan cache query shape is **not** used to
-       generate query plans.
-    
-       For a query, if the cache entry state for a shape is
-       :ref:`Inactive <cache-entry-inactive>`:
+    1.  Candidate plans are evaluated and a winning plan is selected.
+    2.  The cache creates an entry for the plan cache query shape in state
+        Inactive with a value that
+        quantifies the amount of work required by the plan.
 
-       #. Candidate plans are evaluated and a winning plan is selected.
-  
-       #. The selected plan's value that quantifies the amount of work
-          required by the plan is compared to the :ref:`Inactive
-          <cache-entry-inactive>` entry's. If the selected plan's value is:
-     
-          - Less than or equal to the :ref:`Inactive <cache-entry-inactive>` entry's:
-               The selected plan replaces the placeholder :ref:`Inactive
-               <cache-entry-inactive>` entry and has an :ref:`Active
-               <cache-entry-active>` state.
-       
-               If before the replacement happens, the :ref:`Inactive
-               <cache-entry-inactive>` entry becomes :ref:`Active
-               <cache-entry-active>` (for example, due to another query
-               operation), the newly active entry will only be replaced
-               if its value that quantifies the amount of work required
-               by the plan is greater than the selected plan.
+- - Inactive
 
-          - Greater than the :ref:`Inactive <cache-entry-inactive>` entry's:
-               The :ref:`Inactive <cache-entry-inactive>` entry remains
-               but its value that quantifies the amount of work required
-               by the plan is incremented.
+  - <div id="cache-entry-inactive">
 
-   * - :ref:`Active <cache-entry-active>`
+    The entry in the cache is a placeholder entry for this shape.
+    That is, the planner has seen the shape, calculated a value that
+    quantifies the amount of work required by the plan and stored the
+    shape placeholder entry but the plan cache query shape is **not** used to
+    generate query plans.
 
-     - .. _cache-entry-active:
+    </div>
 
-       The entry in the cache is for the winning plan. The planner can
-       use this entry to generate query plans.
+    For a query, if the cache entry state for a shape is
+    Inactive:
 
-       For a query, if the cache entry state for a shape is :ref:`Active
-       <cache-entry-active>`:
+    1.  Candidate plans are evaluated and a winning plan is selected.
+    2.  The selected plan's value that quantifies the amount of work
+        required by the plan is compared to the Inactive entry's. If the selected plan's value is:
+        - Less than or equal to the Inactive entry's:  
+          The selected plan replaces the placeholder Inactive entry and has an Active state.
 
-       The active entry is used to generate query plans.
+          If before the replacement happens, the Inactive entry becomes Active (for example, due to another query
+          operation), the newly active entry will only be replaced
+          if its value that quantifies the amount of work required
+          by the plan is greater than the selected plan.
 
-       The planner also evaluates the entry's performance and if its
-       value that quantifies the amount of work required by the plan no
-       longer meets the selection criterion, it will transition to
-       :ref:`Inactive <cache-entry-inactive>` state.
+        - Greater than the Inactive entry's:  
+          The Inactive entry remains
+          but its value that quantifies the amount of work required
+          by the plan is incremented.
 
-See :ref:`query-plans-plan-cache-flushes` for additional scenarios that trigger
+\* - Active
+
+> - <div id="cache-entry-active">
+>
+>   The entry in the cache is for the winning plan. The planner can
+>   use this entry to generate query plans.
+>
+>   </div>
+>
+>   For a query, if the cache entry state for a shape is Active:
+>
+>   The active entry is used to generate query plans.
+>
+>   The planner also evaluates the entry's performance and if its
+>   value that quantifies the amount of work required by the plan no
+>   longer meets the selection criterion, it will transition to
+>   Inactive state.
+
+See query-plans-plan-cache-flushes for additional scenarios that trigger
 changes to the plan cache.
 
-
-Query Plan and Cache Information
---------------------------------
+## Query Plan and Cache Information
 
 To view the query plan information for a given query, you can use
-:method:`db.collection.explain()` or the :method:`cursor.explain()` .
+`db.collection.explain()` or the `cursor.explain()` .
 
-To view plan cache information for a collection, you can use the 
-:pipeline:`$planCacheStats` aggregation stage.
+To view plan cache information for a collection, you can use the
+`\$planCacheStats` aggregation stage.
 
-.. _query-plans-query-revision:
+## Plan Cache Flushes
 
-.. _query-plans-plan-cache-flushes:
-
-Plan Cache Flushes
-------------------
-
-The query plan cache does not persist if a :binary:`~bin.mongod`
+The query plan cache does not persist if a `mongod`
 restarts or shuts down. In addition:
 
 - Any DDL event clears the plan cache for the relevant collection.
   Example DDL events include dropping a collection, and creating,
   deleting, or hiding an index.
-
 - Least recently used (LRU) cache replacement mechanism clears the
   least recently accessed cache entry, regardless of state.
 
 Users can also:
 
 - Manually clear the entire plan cache using the
-  :method:`PlanCache.clear()` method.
-
+  `PlanCache.clear()` method.
 - Manually clear specific plan cache entries using the
-  :method:`PlanCache.clearPlansByQuery()` method.
+  `PlanCache.clearPlansByQuery()` method.
 
-.. seealso::
+> **See also**
+>
+> query-hash-plan-cache-key
 
-   :ref:`query-hash-plan-cache-key`
-
-Plan Cache Debug Info Size Limit
---------------------------------
+## Plan Cache Debug Info Size Limit
 
 Starting in MongoDB 5.0, the
-:ref:`plan cache <query-plans-query-optimization>` will save full 
-``plan cache`` entries only if the cumulative size of the 
-``plan caches`` for all collections is lower than 0.5 GB. When the 
-cumulative size of the ``plan caches`` for all collections exceeds this 
-threshold, additional ``plan cache`` entries are stored without the 
+plan cache will save full
+`plan cache` entries only if the cumulative size of the
+`plan caches` for all collections is lower than 0.5 GB. When the
+cumulative size of the `plan caches` for all collections exceeds this
+threshold, additional `plan cache` entries are stored without the
 following debug information:
 
-- :ref:`createdFromQuery <plancachestats-createdFromQuery>`
-- :ref:`cachedPlan <plancachestats-cachedPlan>`
-- :ref:`creationExecStats <plancachestats-creationExecStats>`
-- :ref:`candidatePlanScores <plancachestats-candidatePlanScores>`
+- createdFromQuery
+- cachedPlan
+- creationExecStats
+- candidatePlanScores
 
-The estimated size in bytes of a ``plan cache`` entry is available in
-the output of :pipeline:`$planCacheStats`.
+The estimated size in bytes of a `plan cache` entry is available in
+the output of `\$planCacheStats`.
 
-.. _query-hash-plan-cache-key:
+## planCacheShapeHash and planCacheKey
 
-planCacheShapeHash and planCacheKey
------------------------------------
+### planCacheShapeHash
 
-.. _query-hash:
+### planCacheKey
 
-planCacheShapeHash
-~~~~~~~~~~~~~~~~~~
+For example, consider a collection `foo` with the following indexes:
 
-.. include:: /includes/extracts/4.2-changes-query-shapes.rst
+```javascript
+db.foo.createIndex( { x: 1 } )
+db.foo.createIndex( { x: 1, y: 1 } )
+db.foo.createIndex( { x: 1, z: 1 }, { partialFilterExpression: { x: { $gt: 10 } } } )
 
-.. _plan-cache-key:
-
-planCacheKey
-~~~~~~~~~~~~
-
-.. include:: /includes/extracts/4.2-changes-plan-cache-key.rst
-
-For example, consider a collection ``foo`` with the following indexes:
- 
-.. code-block:: javascript
-
-   db.foo.createIndex( { x: 1 } )
-   db.foo.createIndex( { x: 1, y: 1 } )
-   db.foo.createIndex( { x: 1, z: 1 }, { partialFilterExpression: { x: { $gt: 10 } } } )
+```
 
 The following queries on the collection have the same shape:
 
-.. code-block:: javascript
+```javascript
+db.foo.explain().find( { x: { $gt: 5 } } )  // Query Operation 1
+db.foo.explain().find( { x: { $gt: 20 } } ) // Query Operation 2
 
-   db.foo.explain().find( { x: { $gt: 5 } } )  // Query Operation 1
-   db.foo.explain().find( { x: { $gt: 20 } } ) // Query Operation 2
+```
 
-Given these queries, the index with the :ref:`partial filter expression
-<partial-index-query-coverage>` can support query operation 2 but *not*
+Given these queries, the index with the partial filter expression can support query operation 2 but *not*
 support query operation 1. Since the indexes available to support query operation 1
 differs from query operation 2, the two queries have different
-``planCacheKey``.
+`planCacheKey`.
 
-If one of the indexes were dropped, or if a new index ``{ x: 1, a: 1
-}`` were added, the ``planCacheKey`` for both query operations will
+If one of the indexes were dropped, or if a new index `{ x: 1, a: 1 }` were added, the `planCacheKey` for both query operations will
 change.
 
-Availability
-~~~~~~~~~~~~
+### Availability
 
-The ``planCacheShapeHash`` and ``planCacheKey`` are available in:
+The `planCacheShapeHash` and `planCacheKey` are available in:
 
-- :ref:`explain() output <explain-results>` fields:
-  
-  - :data:`queryPlanner.planCacheShapeHash <explain.queryPlanner.planCacheShapeHash>`
-  - :data:`queryPlanner.planCacheKey <explain.queryPlanner.planCacheKey>`
+- explain() output fields:
+  - `queryPlanner.planCacheShapeHash`
+  - `queryPlanner.planCacheKey`
+- profiler log messages
+  and diagnostic log messages (i.e. mongod/mongos log messages) when logging slow queries.
+- `\$planCacheStats` aggregation stage
+- `PlanCache.listQueryShapes()`
+  method/`planCacheListQueryShapes` command
+- `PlanCache.getPlansByQuery()`
+  method/`planCacheListPlans` command
 
-  .. include:: /includes/plan-cache-rename.rst
+## Index Filters
 
-- :ref:`profiler log messages <database-profiler>`
-  and :ref:`diagnostic log messages (i.e. mongod/mongos log
-  messages)<log-messages-ref>` when logging slow queries.
-
-- :pipeline:`$planCacheStats` aggregation stage
-
-- ``PlanCache.listQueryShapes()``
-  method/``planCacheListQueryShapes`` command
-
-- ``PlanCache.getPlansByQuery()``
-  method/``planCacheListPlans`` command
-
-.. _index-filters:
-
-Index Filters
--------------
-
-Index filters are set with the :dbcommand:`planCacheSetFilter` command
-and determine which indexes the planner evaluates for a :term:`query
-shape`. A plan cache query shape consists of a combination of query, sort, and
+Index filters are set with the `planCacheSetFilter` command
+and determine which indexes the planner evaluates for a query shape. A plan cache query shape consists of a combination of query, sort, and
 projection specifications. If an index filter exists for a given query
 shape, the planner only considers those indexes specified in the
 filter.
 
 When an index filter exists for the plan cache query shape, MongoDB ignores the
-:method:`~cursor.hint()`. To see whether MongoDB applied an index
-filter for a query shape, check the :data:`~explain.queryPlanner.indexFilterSet`
-field of either the :method:`db.collection.explain()` or the
-:method:`cursor.explain()` method.
+`hint()`. To see whether MongoDB applied an index
+filter for a query shape, check the `indexFilterSet`
+field of either the `db.collection.explain()` or the
+`cursor.explain()` method.
 
 Index filters only affect which indexes the planner evaluates; the
 planner may still select the collection scan as the winning plan for
@@ -283,14 +205,13 @@ persist after shutdown. MongoDB also provides a command to manually remove
 filters.
 
 Because index filters override the expected behavior of the planner
-as well as the :method:`~cursor.hint()` method, use index filters
+as well as the `hint()` method, use index filters
 sparingly.
 
-.. include:: /includes/index-filters-and-collations.rst
-
-.. seealso::
-
-   - :dbcommand:`planCacheListFilters`
-   - :dbcommand:`planCacheClearFilters`
-   - :dbcommand:`planCacheSetFilter`
-   - :doc:`/applications/indexes`
+> **See also**
+>
+> - `planCacheListFilters`
+> - `planCacheClearFilters`
+> - `planCacheSetFilter`
+>
+> \- /applications/indexes

@@ -1,90 +1,37 @@
-.. _security-auth-x509:
-
-=====
-x.509
-=====
-
-.. meta::
-   :description: Authenticate MongoDB clients and cluster members using X.509 certificates, requiring TLS/SSL connections and specific certificate attributes.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# x.509
 
 MongoDB supports X.509 certificate authentication for client
 authentication and internal authentication of the members of replica
 sets and sharded clusters.
 
-X.509 certificate authentication requires a secure :doc:`TLS/SSL
-connection </tutorial/configure-ssl>`.
+X.509 certificate authentication requires a secure TLS/SSL connection.
 
-Certificate Authority
----------------------
+## Certificate Authority
 
-.. include:: /includes/fact-ssl-certificate-authorities.rst
-
-.. _x509-client-certificate-auth:
-
-Client X.509 Certificates
--------------------------
+## Client X.509 Certificates
 
 To authenticate to servers, clients can use X.509 certificates instead
 of usernames and passwords.
 
-.. _client-x509-certificates-requirements:
+### Client Certificate Requirements
 
-Client Certificate Requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### MongoDB User and `$external` Database
 
-.. include:: /includes/extracts/x509-certificate-client.rst
-
-.. _client-x509-mongodb-user:
-
-MongoDB User and ``$external`` Database
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To authenticate with a client certificate, you must first add the client 
-certificate's ``subject`` as a MongoDB user in the ``$external`` database. 
-The ``$external`` database is the :ref:`authentication-database` for the user.
+To authenticate with a client certificate, you must first add the client
+certificate's `subject` as a MongoDB user in the `$external` database.
+The `$external` database is the authentication-database for the user.
 
 Each unique X.509 client certificate is for one MongoDB user.
 You cannot use a single client certificate to authenticate more than one
 MongoDB user.
 
+### TLS Connection X509 Certificate Startup Warning
 
-
-.. include:: /includes/extracts/sessions-external-username-limit.rst
-
-TLS Connection X509 Certificate Startup Warning
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/fact-5.0-x509-certificate-client-warning.rst
-
-Member X.509 Certificates
--------------------------
+## Member X.509 Certificates
 
 For internal authentication between members of sharded clusters and
-replica sets, you can use X.509 certificates instead of :doc:`keyfiles 
-</tutorial/deploy-sharded-cluster-with-keyfile-access-control>`.
+replica sets, you can use X.509 certificates instead of keyfiles.
 
-.. _x509-member-certificate-requirements:
+### Member Certificate Requirements
 
-Member Certificate Requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/x509-certificate-member.rst
-
-MongoDB Configuration for Membership Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/x509-member-auth-configuration.rst
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Authenticate Clients </tutorial/configure-x509-client-authentication>
+### MongoDB Configuration for Membership Authentication

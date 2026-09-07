@@ -1,145 +1,95 @@
-.. _intro-to-mongodb:
+# Introduction to MongoDB
 
-=======================
-Introduction to MongoDB
-=======================
+* [environments | you can create a MongoDB database](includes/fact-environments.rst)
+* [how to create a MongoDB database -- via -- Atlas UI](../../../atlas/source/getting-started.md)
 
-.. default-domain:: mongodb
+## Document Database
 
-.. facet::
-   :name: genre
-   :values: reference
+* MongoDB's record
+  * == document /
+    * == 💡data structure 💡
+      * == field + value pairs
+        * ALLOWED value pairs
+          * OTHER documents
+          * arrays
+          * arrays of documents 
+    * == JSON objects
+    * benefits
+      * == native data types | MANY programming languages
+      * embedded documents & arrays
+        * reduce need -- for -- expensive joins
+      * if you use a dynamic schema -> supports fluent polymorphism
 
-.. meta:: 
-   :description: Learn about the advantages of MongoDB document databases.
-   :keywords: atlas
+  ![](images/crud-annotated-document.svg)
 
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+### Collections/Views/On-Demand Materialized Views
 
-You can create a MongoDB database in the following environments:
+* collections
+  * == tables | relational databases
+  * uses
+    * store MongoDB's documents 
 
-.. include:: /includes/fact-environments.rst
+* MongoDB
+  * supports
+    * collections
+    * [views](core/views.md)
+    * [materialized views](core/materialized-views.md)
 
-To learn more about creating a MongoDB database with the Atlas UI,
-see :atlas:`Get Started with Atlas </getting-started>`.
+## Key Features
 
-Document Database
------------------
+### High Performance
 
-A record in MongoDB is a document, which is a data structure composed
-of field and value pairs. MongoDB documents are similar to JSON
-objects. The values of fields may include other documents, arrays,
-and arrays of documents.
-
-.. include:: /images/crud-annotated-document.rst
-
-The advantages of using documents are:
-
-- Documents correspond to native data types in many programming 
-  languages.
-
-- Embedded documents and arrays reduce need for expensive joins.
-
-- Dynamic schema supports fluent polymorphism.
-
-Collections/Views/On-Demand Materialized Views
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-MongoDB stores documents in :ref:`collections <collections>`.
-Collections are analogous to tables in relational databases.
-
-In addition to collections, MongoDB supports:
-
-- Read-only :doc:`/core/views` 
-
-- :doc:`/core/materialized-views` 
-
-Key Features
-------------
-
-High Performance
-~~~~~~~~~~~~~~~~
-
+TODO: 
 MongoDB provides high performance data persistence. In particular,
 
 - Support for embedded data models reduces I/O activity on database
   system.
-
 - Indexes support faster queries and can include keys from embedded
   documents and arrays.
 
-Query API
-~~~~~~~~~
+### Query API
 
-The MongoDB Query API supports :ref:`read and write
-operations (CRUD) <crud>` as well as:
+The MongoDB Query API supports read and write operations (CRUD) as well as:
 
-- :ref:`Data Aggregation <aggregation-pipeline>`
+- Data Aggregation
+- Text Search and Geospatial Queries.
 
-- :ref:`Text Search <text-search>` and :doc:`Geospatial Queries
-  </tutorial/geospatial-tutorial>`.
+> **See also**
+>
+> - /reference/sql-comparison
+>
+> \- /reference/sql-aggregation-comparison
 
-.. seealso::
-   
-   - :doc:`/reference/sql-comparison`
-   - :doc:`/reference/sql-aggregation-comparison`
-   
-High Availability
-~~~~~~~~~~~~~~~~~
+### High Availability
 
-MongoDB's replication facility, called :doc:`replica set
-</replication>`, provides:
+MongoDB's replication facility, called replica set, provides:
 
 - *automatic* failover
-
 - data redundancy.
 
-A :doc:`replica set </replication>` is a group of
+A replica set is a group of
 MongoDB servers that maintain the same data set, providing redundancy
 and increasing data availability.
 
-Horizontal Scalability
-~~~~~~~~~~~~~~~~~~~~~~
+### Horizontal Scalability
 
 MongoDB provides horizontal scalability as part of its *core*
 functionality:
 
-- :ref:`Sharding <sharding-introduction>` distributes data across a
+- Sharding distributes data across a
   cluster of machines.
-
-- Starting in 3.4, MongoDB supports creating :ref:`zones
-  <zone-sharding>` of data based on the :term:`shard key`. In a
+- Starting in 3.4, MongoDB supports creating zones of data based on the shard key. In a
   balanced cluster, MongoDB directs reads and writes covered by a zone
-  only to those shards inside the zone. See the :ref:`zone-sharding`
+  only to those shards inside the zone. See the zone-sharding
   manual page for more information.
 
+### Support for Multiple Storage Engines
 
-Support for Multiple Storage Engines
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+MongoDB supports multiple storage engines:
 
-MongoDB supports :doc:`multiple storage engines
-</core/storage-engines>`:
-
-- :doc:`/core/wiredtiger` (including support for
-  :doc:`/core/security-encryption-at-rest`)
-
-- :doc:`/core/inmemory`.
+- /core/wiredtiger (including support for
+  /core/security-encryption-at-rest)
+- /core/inmemory.
 
 In addition, MongoDB provides pluggable storage engine API that allows
 third parties to develop storage engines for MongoDB.
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Get Started </tutorial/getting-started>
-   Create an Atlas Free Tier Cluster <https://docs.atlas.mongodb.com/getting-started/>
-   MongoDB Shell (mongosh) <https://www.mongodb.com/docs/mongodb-shell/>
-   Databases & Collections </core/databases-and-collections>
-   Documents </core/document>
-   Query API </query-api>
-   BSON Types </reference/bson-types>

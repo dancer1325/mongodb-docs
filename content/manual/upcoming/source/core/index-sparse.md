@@ -1,20 +1,4 @@
-
-.. _index-type-sparse:
-
-==============
-Sparse Indexes
-==============
-
-.. meta::
-   :description: Create sparse indexes in MongoDB to index only documents with the indexed field, skipping those without it, and consider using partial indexes for enhanced functionality.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# Sparse Indexes
 
 Sparse indexes only contain entries for documents that have the indexed
 field, even if the index field contains a null value. The index skips
@@ -24,227 +8,209 @@ contrast, non-sparse indexes contain all documents in a collection,
 storing null values for those documents that do not contain the indexed
 field.
 
-.. important::
+> **Important**
+>
+> Partial indexes can function as
+> sparse indexes, but also support filter expressions for conditions beyond
+> whether a field exists. Use a partial index for greater
+> control if you need precise filtering.
 
-   :ref:`Partial indexes <partial-sparse-index-comparison>` can function as 
-   sparse indexes, but also support filter expressions for conditions beyond 
-   whether a field exists. Use a partial index for greater 
-   control if you need precise filtering.
+## Create a Sparse Index
 
-Create a Sparse Index
----------------------
+To create a sparse index, use the `db.collection.createIndex()`
+method with the `sparse` option set to `true`.
 
-To create a sparse index, use the :method:`db.collection.createIndex()`
-method with the ``sparse`` option set to ``true``.
+For example, the following operation in `mongosh` creates a
+sparse index on the `xmpp_id` field of the `addresses` collection:
 
-For example, the following operation in :binary:`~bin.mongosh` creates a
-sparse index on the ``xmpp_id`` field of the ``addresses`` collection:
+```javascript
+db.addresses.createIndex( { "xmpp_id": 1 }, { sparse: true } )
 
-.. code-block:: javascript
+```
 
-   db.addresses.createIndex( { "xmpp_id": 1 }, { sparse: true } )
-
-The index does not index documents that do not include the ``xmpp_id``
+The index does not index documents that do not include the `xmpp_id`
 field.
 
-.. note::
+> **Note**
+>
+> Do not confuse sparse indexes in MongoDB with [block-level]()
+> indexes in other databases. Think of them as dense indexes with a
+> specific filter.
 
-   Do not confuse sparse indexes in MongoDB with `block-level`_
-   indexes in other databases. Think of them as dense indexes with a
-   specific filter.
+## Behavior
 
-   .. _`block-level`: http://en.wikipedia.org/wiki/Database_index#Sparse_index
-
-Behavior
---------
-
-Sparse Index and Incomplete Results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Sparse Index and Incomplete Results
 
 If a sparse index would result in an incomplete result set for queries
 and sort operations, MongoDB will not use that index unless a
-:method:`~cursor.hint()` explicitly specifies the index.
+`hint()` explicitly specifies the index.
 
-For example, the query ``{ x: { $exists: false } }`` will not use a
-sparse index on the ``x`` field unless explicitly hinted. See
-:ref:`sparse-index-incomplete-results` for an example that details the
+For example, the query `{ x: { $exists: false } }` will not use a
+sparse index on the `x` field unless explicitly hinted. See
+sparse-index-incomplete-results for an example that details the
 behavior.
 
-.. include:: /includes/fact-sparse-index-hint-count.rst
-
-Indexes that are Sparse by Default
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Indexes that are Sparse by Default
 
 The following index types are always sparse:
 
-- :ref:`2d <2d-index>`
+- 2d
+- 2dsphere (version 2)
+- Text
+- Wildcard
 
-- :ref:`2dsphere (version 2) <2dsphere-v2>`
+### Sparse Compound Indexes
 
-- :ref:`Text <index-feature-text>`
+### Sparse and Unique Properties
 
-- :ref:`Wildcard <wildcard-index-core>`
-
-.. _sparse-compound-indexes:
-
-Sparse Compound Indexes
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/indexes/sparse-compound-indexes.rst
-
-.. _sparse-unique-index:
-
-Sparse and Unique Properties
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-An index that is both sparse and :ref:`unique <index-type-unique>`
+An index that is both sparse and unique
 prevents a collection from having documents with duplicate values for a
 field but allows multiple documents that omit the key.
 
-Examples
---------
+## Examples
 
-Create a Sparse Index On A Collection
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Create a Sparse Index On A Collection
 
-Consider a collection ``scores`` that contains the following documents:
+Consider a collection `scores` that contains the following documents:
 
-.. code-block:: javascript
+```javascript
+{ "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
+{ "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
+{ "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
 
-   { "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
-   { "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
-   { "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
+```
 
-The collection has a sparse index on the field ``score``:
+The collection has a sparse index on the field `score`:
 
-.. code-block:: javascript
+```javascript
+db.scores.createIndex( { score: 1 } , { sparse: true } )
 
-   db.scores.createIndex( { score: 1 } , { sparse: true } )
+```
 
-Then, the following query on the ``scores`` collection uses the sparse
-index to return the documents that have the ``score`` field less than
-(:query:`$lt`) ``90``:
+Then, the following query on the `scores` collection uses the sparse
+index to return the documents that have the `score` field less than
+(`\$lt`) `90`:
 
-.. code-block:: javascript
+```javascript
+db.scores.find( { score: { $lt: 90 } } )
 
-   db.scores.find( { score: { $lt: 90 } } )
+```
 
-Because the document for the userid ``"newbie"`` does not contain the
-``score`` field and thus does not meet the query criteria, the query
+Because the document for the userid `"newbie"` does not contain the
+`score` field and thus does not meet the query criteria, the query
 can use the sparse index to return the results:
 
-.. code-block:: javascript
+```javascript
+{ "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
 
-   { "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
+```
 
-.. _sparse-index-incomplete-results:
+### Sparse Index On A Collection Cannot Return Complete Results
 
-Sparse Index On A Collection Cannot Return Complete Results
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Consider a collection `scores` that contains the following documents:
 
-Consider a collection ``scores`` that contains the following documents:
+```javascript
+{ "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
+{ "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
+{ "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
 
-.. code-block:: javascript
+```
 
-   { "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
-   { "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
-   { "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
+The collection has a sparse index on the field `score`:
 
-The collection has a sparse index on the field ``score``:
+```javascript
+db.scores.createIndex( { score: 1 } , { sparse: true } )
 
-.. code-block:: javascript
+```
 
-   db.scores.createIndex( { score: 1 } , { sparse: true } )
-
-Because the document for the userid ``"newbie"`` does not contain the
-``score`` field, the sparse index does not contain an entry for that
+Because the document for the userid `"newbie"` does not contain the
+`score` field, the sparse index does not contain an entry for that
 document.
 
-Consider the following query to return **all** documents in the ``scores``
-collection, sorted by the ``score`` field:
+Consider the following query to return **all** documents in the `scores`
+collection, sorted by the `score` field:
 
-.. code-block:: javascript
+```javascript
+db.scores.find().sort( { score: -1 } )
 
-   db.scores.find().sort( { score: -1 } )
+```
 
 Even though the sort is by the indexed field, MongoDB will **not**
 select the sparse index to fulfill the query in order to return
 complete results:
 
-.. code-block:: javascript
+```javascript
+{ "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
+{ "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
+{ "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
 
-   { "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
-   { "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
-   { "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
+```
 
 To use the sparse index, explicitly specify the index with
-:method:`~cursor.hint()`:
+\`hint()\`:
 
-.. code-block:: javascript
+```javascript
+db.scores.find().sort( { score: -1 } ).hint( { score: 1 } )
 
-   db.scores.find().sort( { score: -1 } ).hint( { score: 1 } )
+```
 
 The use of the index results in the return of only those documents with
-the ``score`` field:
+the `score` field:
 
-.. code-block:: javascript
+```javascript
+{ "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
+{ "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
 
-   { "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
-   { "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
+```
 
-.. seealso::
+> **See also**
+>
+> - `explain()`
+> - /tutorial/analyze-query-plan
 
-   - :method:`~cursor.explain()`
-   - :doc:`/tutorial/analyze-query-plan`
+### Sparse Index with Unique Constraint
 
+Consider a collection `scores` that contains the following documents:
 
-Sparse Index with Unique Constraint
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```javascript
+{ "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
+{ "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
+{ "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
 
-Consider a collection ``scores`` that contains the following documents:
+```
 
-.. code-block:: javascript
-
-   { "_id" : ObjectId("523b6e32fb408eea0eec2647"), "userid" : "newbie" }
-   { "_id" : ObjectId("523b6e61fb408eea0eec2648"), "userid" : "abby", "score" : 82 }
-   { "_id" : ObjectId("523b6e6ffb408eea0eec2649"), "userid" : "nina", "score" : 90 }
-
-You could create an index with a :ref:`unique constraint
-<index-type-unique>` and sparse filter on the ``score`` field using
+You could create an index with a unique constraint and sparse filter on the `score` field using
 the following operation:
 
-.. code-block:: javascript
+```javascript
+db.scores.createIndex( { score: 1 } , { sparse: true, unique: true } )
 
-   db.scores.createIndex( { score: 1 } , { sparse: true, unique: true } )
+```
 
 This index *would permit* the insertion of documents that had unique
-values for the ``score`` field *or* did not include a ``score`` field.
-As such, given the existing documents in the ``scores`` collection, the
-index permits the following :doc:`insert operations
-</tutorial/insert-documents>`:
+values for the `score` field *or* did not include a `score` field.
+As such, given the existing documents in the `scores` collection, the
+index permits the following insert operations:
 
-.. code-block:: javascript
+```javascript
+db.scores.insertMany( [
+   { "userid": "newbie", "score": 43 },
+   { "userid": "abby", "score": 34 },
+   { "userid": "nina" }
+] )
 
-   db.scores.insertMany( [
-      { "userid": "newbie", "score": 43 },
-      { "userid": "abby", "score": 34 },
-      { "userid": "nina" }
-   ] )
+```
 
 However, the index *would not permit* the addition of the following
-documents since documents already exists with ``score`` value of ``82``
-and ``90``:
+documents since documents already exists with `score` value of `82`
+and `90`:
 
-.. code-block:: javascript
+```javascript
+db.scores.insertMany( [
+   { "userid": "newbie", "score": 82 },
+   { "userid": "abby", "score": 90 }
+] )
 
-   db.scores.insertMany( [
-      { "userid": "newbie", "score": 82 },
-      { "userid": "abby", "score": 90 }
-   ] )
+```
 
-.. _sparse-and-non-sparse_example:
-
-Sparse and Non-Sparse Unique Indexes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/fact-5.0-sparse-unique-index-updates.rst
+### Sparse and Non-Sparse Unique Indexes

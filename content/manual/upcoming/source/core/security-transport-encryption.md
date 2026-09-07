@@ -1,47 +1,17 @@
-.. _transport-encryption:
+# TLS/SSL (Transport Encryption)
 
-==============================
-TLS/SSL (Transport Encryption)
-==============================
+## TLS/SSL
 
-.. meta::
-   :description: Secure MongoDB network traffic with TLS/SSL, supporting strong ciphers and forward secrecy, and manage certificates for encryption and identity verification.
+### TLS Versions
 
-.. default-domain:: mongodb
+### TLS Libraries
 
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-TLS/SSL
--------
-
-.. include:: /includes/tls-ssl-encryption-intro.rst
-
-.. include:: /includes/ssl-and-fips-support.rst
-
-TLS Versions
-~~~~~~~~~~~~
-
-.. include:: /includes/fact-tls-1.0.rst
-
-TLS Libraries
-~~~~~~~~~~~~~
-
-.. include:: /includes/fact-tls-libraries.rst
-
-TLS/SSL Ciphers
----------------
+## TLS/SSL Ciphers
 
 MongoDB's TLS/SSL encryption only allows use of strong TLS/SSL ciphers
 with a minimum of 128-bit key length for all connections.
 
-.. _tls-forward-secrecy:
-
-Forward Secrecy
-~~~~~~~~~~~~~~~
+### Forward Secrecy
 
 Forward Secrecy cipher suites create an ephemeral session key that is
 protected by the server's private key but is never transmitted. The use
@@ -52,201 +22,151 @@ MongoDB supports Forward Secrecy cipher suites that use Ephemeral
 Diffie-Hellman (DHE) and Ephemeral Elliptic Curve Diffie-Hellman
 (ECDHE) algorithms.
 
-.. _ecdhe:
+#### Ephemeral Elliptic Curve Diffie-Hellman (ECDHE)
 
-Ephemeral Elliptic Curve Diffie-Hellman (ECDHE)
-```````````````````````````````````````````````
+- - Platform
+  - Level of Support
 
-.. list-table::
-   :header-rows: 1
-   :stub-columns: 1
-   :widths: 10 90
-   
-   * - Platform
-     - Level of Support
+- - Linux
 
-   * - Linux
-   
-     - If the Linux platform's OpenSSL supports automatic curve selection, 
-       MongoDB enables support for Ephemeral Elliptic Curve Diffie-Hellman 
-       (ECDHE).
-   
-       Else if the Linux platform's OpenSSL does not support automatic curve 
-       selection, MongoDB attempts to enable ECDHE support using ``prime256v1`` 
-       as the named curve.
+  - If the Linux platform's OpenSSL supports automatic curve selection,
+    MongoDB enables support for Ephemeral Elliptic Curve Diffie-Hellman
+    (ECDHE).
 
-   * - Windows
-   
-     - Ephemeral Elliptic Curve Diffie-Hellman (ECDHE) is implicitly supported 
-       through the use of Secure Channel (Schannel), the native Windows TLS/SSL 
-       library.
+    Else if the Linux platform's OpenSSL does not support automatic curve
+    selection, MongoDB attempts to enable ECDHE support using `prime256v1`
+    as the named curve.
 
-   * - macOS
-   
-     - Ephemeral Elliptic Curve Diffie-Hellman (ECDHE) is implicitly supported 
-       through the use of Secure Transport, the native macOS TLS/SSL library.
+- - Windows
+  - Ephemeral Elliptic Curve Diffie-Hellman (ECDHE) is implicitly supported
+    through the use of Secure Channel (Schannel), the native Windows TLS/SSL
+    library.
+
+\* - macOS
+
+> - Ephemeral Elliptic Curve Diffie-Hellman (ECDHE) is implicitly supported
+>   through the use of Secure Transport, the native macOS TLS/SSL library.
 
 ECDHE cipher suites are slower than static RSA cipher suites. For
 better performance with ECDHE, you can use certificates that use
-Elliptic Curve Digital Signature Algorithm (``ECDSA``). See also
-:ref:`forward-secrecy-performance` for more information
+Elliptic Curve Digital Signature Algorithm (`ECDSA`). See also
+forward-secrecy-performance for more information
 
-.. _dhe:
+#### Ephemeral Diffie-Hellman (DHE)
 
-Ephemeral Diffie-Hellman (DHE)
-``````````````````````````````
+- - Platform
+  - Level of Support
+- - Linux
+  - MongoDB enables support for Ephemeral Diffie-Hellman (DHE):
+    - If the `opensslDiffieHellmanParameters` is set at
+      startup (regardless of whether ECDHE is enabled
+      or disabled).
+    - Else, if the `opensslDiffieHellmanParameters`
+      parameter is unset but if ECDHE is enabled,
+      MongoDB enables DHE using the `ffdhe3072` parameter, as
+      defined in 7919#appendix-A.2.
+- - Windows
+  - Ephemeral Diffie-Hellman (DHE) is implicitly supported through the use
+    of Secure Channel (Schannel), the native Windows TLS/SSL library.
+- - macOS
+  - Ephemeral Diffie-Hellman (DHE) is implicitly supported through the use
+    of Secure Transport, the native macOS TLS/SSL library.
 
-.. list-table::
-   :header-rows: 1
-   :stub-columns: 1
-   :widths: 10 90
-   
-   * - Platform
-     - Level of Support
-
-   * - Linux
-
-     - MongoDB enables support for Ephemeral Diffie-Hellman (DHE):
-
-       - If the :parameter:`opensslDiffieHellmanParameters` is set at
-         startup (regardless of whether :ref:`ECDHE <ecdhe>` is enabled
-         or disabled).
-
-       - Else, if the :parameter:`opensslDiffieHellmanParameters`
-         parameter is unset but if :ref:`ECDHE <ecdhe>` is enabled,
-         MongoDB enables DHE using the ``ffdhe3072`` parameter, as
-         defined in :rfc:`7919#appendix-A.2`.
-
-   * - Windows
-   
-     - Ephemeral Diffie-Hellman (DHE) is implicitly supported through the use 
-       of Secure Channel (Schannel), the native Windows TLS/SSL library.
-
-   * - macOS
-
-     - Ephemeral Diffie-Hellman (DHE) is implicitly supported through the use 
-       of Secure Transport, the native macOS TLS/SSL library.
-
-.. note::
-
-   If clients negotiate a cipher suite with DHE but cannot accept the
-   server selected parameter, the TLS connection fails.
-   
-   Strong parameters (i.e. size is greater than 1024) are not supported
-   with Java 6 and 7 unless extended support has been purchased from
-   Oracle. However, Java 7 supports and prefers ECDHE, so will
-   negotiate ECDHE if available.
+> **Note**
+>
+> If clients negotiate a cipher suite with DHE but cannot accept the
+> server selected parameter, the TLS connection fails.
+>
+> Strong parameters (i.e. size is greater than 1024) are not supported
+> with Java 6 and 7 unless extended support has been purchased from
+> Oracle. However, Java 7 supports and prefers ECDHE, so will
+> negotiate ECDHE if available.
 
 DHE (and ECDHE) cipher suites are slower performance than static
 RSA cipher suites, with DHE being significantly slower than ECDHE. See
-:ref:`forward-secrecy-performance` for more information.
+forward-secrecy-performance for more information.
 
-.. _forward-secrecy-performance:
-
-Forward Secrecy Performance
-```````````````````````````
+#### Forward Secrecy Performance
 
 DHE and ECDHE cipher suites are slower than static RSA cipher suites,
 with DHE being significantly slower than ECDHE.
 
 For better performance with ECDHE, you can use certificates that
-use Elliptic Curve Digital Signature Algorithm (``ECDSA``).
+use Elliptic Curve Digital Signature Algorithm (`ECDSA`).
 Alternatively, you can disable ECDHE cipher suites with the
-:parameter:`opensslCipherConfig` parameter as in the following example
+`opensslCipherConfig` parameter as in the following example
 (which also disables DHE)
 
-.. code-block:: bash
+```bash
+mongod --setParameter opensslCipherConfig='HIGH:!EXPORT:!aNULL:!kECDHE:!ECDHE:!DHE:!kDHE@STRENGTH'
 
-   mongod --setParameter opensslCipherConfig='HIGH:!EXPORT:!aNULL:!kECDHE:!ECDHE:!DHE:!kDHE@STRENGTH'
+```
 
 If you need to disable support for DHE cipher suites due to
-performance, you can use the :parameter:`opensslCipherConfig`
+performance, you can use the `opensslCipherConfig`
 parameter, as in the following example:
 
-.. code-block:: bash
+```bash
+mongod --setParameter opensslCipherConfig='HIGH:!EXPORT:!aNULL:!DHE:!kDHE@STRENGTH'
 
-   mongod --setParameter opensslCipherConfig='HIGH:!EXPORT:!aNULL:!DHE:!kDHE@STRENGTH'
+```
 
-.. |binary| replace:: MongoDB
-
-Certificates
-------------
+## Certificates
 
 To use TLS/SSL with MongoDB , you must have the TLS/SSL certificates as
-:file:`PEM` files, which are concatenated certificate containers.
+`PEM` files, which are concatenated certificate containers.
 
 MongoDB can use any valid TLS/SSL certificate issued by a certificate
 authority or a self-signed certificate. For production use, your MongoDB
-deployment should use valid certificates generated and signed by the 
+deployment should use valid certificates generated and signed by the
 same certificate authority. You can generate and maintain an independent
-certificate authority, or use certificates generated by a third-party 
+certificate authority, or use certificates generated by a third-party
 TLS/SSL vendor.
 
-Using a certificate signed by a trusted certificate authority allows 
+Using a certificate signed by a trusted certificate authority allows
 MongoDB drivers to verify the server's identity.
 
-For example, see :doc:`/tutorial/configure-ssl-clients`.
+For example, see /tutorial/configure-ssl-clients.
 
-Certificate Expiry Warning
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Certificate Expiry Warning
 
-.. include:: /includes/extracts/4.4-changes-certificate-expiry-warning.rst
+### OCSP (Online Certificate Status Protocol)
 
-.. _ocsp-support:
-
-OCSP (Online Certificate Status Protocol)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/fact-ocsp-enabled.rst
-
-To check for certificate revocation, MongoDB :parameter:`enables <ocspEnabled>` 
-the use of OCSP (Online Certificate Status Protocol) by default. The use of 
-OCSP eliminates the need to periodically download a 
-:setting:`Certificate Revocation List (CRL) <net.tls.CRLFile>` and restart the
-:binary:`mongod` / :binary:`mongos` with the updated CRL.
+To check for certificate revocation, MongoDB `enables`
+the use of OCSP (Online Certificate Status Protocol) by default. The use of
+OCSP eliminates the need to periodically download a
+`Certificate Revocation List (CRL)` and restart the
+`mongod` / `mongos` with the updated CRL.
 
 As part of its OCSP support, MongoDB supports the following on
 Linux:
 
-.. include:: /includes/list-ocsp-support.rst
-
 MongoDB also provides the following OCSP-related parameters:
 
-.. include:: /includes/list-table-ocsp-parameters.rst
-
 You can set these parameters at startup using the
-:setting:`setParameter` configuration file setting or the
-:option:`--setParameter <mongod --setParameter>` command line option.
+`setParameter` configuration file setting or the
+`--setParameter` command line option.
 
-.. note::
+> **Note**
+>
+> Starting in MongoDB 5.0, the `rotateCertificates` command
+> and `db.rotateCertificates()` method will also refresh any
+> stapled OCSP responses.
 
-   Starting in MongoDB 5.0, the :dbcommand:`rotateCertificates` command
-   and :method:`db.rotateCertificates()` method will also refresh any
-   stapled OCSP responses.
-   
-Identity Verification
----------------------
+## Identity Verification
 
 In addition to encrypting connections, TLS/SSL allows for authentication
-using certificates, both for :ref:`client authentication
-<authentication>` and for :doc:`internal authentication
-</core/security-internal-authentication>` of members of replica sets and
+using certificates, both for client authentication and for internal authentication of members of replica sets and
 sharded clusters.
 
 For more information, see:
 
-- :doc:`/tutorial/configure-ssl`
+- /tutorial/configure-ssl
+- /tutorial/configure-ssl-clients
+- /tutorial/configure-x509-client-authentication
+- /tutorial/configure-x509-member-authentication
 
-- :doc:`/tutorial/configure-ssl-clients`
-
-- :doc:`/tutorial/configure-x509-client-authentication`
-
-- :doc:`/tutorial/configure-x509-member-authentication`
-
-FIPS Mode
----------
-
-.. include:: /includes/fact-enterprise-only-admonition.rst
+## FIPS Mode
 
 The Federal Information Processing Standard (FIPS) is a U.S. government
 computer security standard used to certify software modules and libraries
@@ -254,14 +174,4 @@ that encrypt and decrypt data securely. You can configure MongoDB to run
 with a FIPS 140-2 certified library for OpenSSL. Configure FIPS to run by
 default or as needed from the command line.
 
-For an example, see :doc:`/tutorial/configure-fips`.
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Configure mongod & mongos </tutorial/configure-ssl>
-   Develop Locally with TLS </tutorial/develop-mongodb-locally-with-tls>
-   Configure Clients </tutorial/configure-ssl-clients>
-   Upgrade Cluster </tutorial/upgrade-cluster-to-ssl>
-   Configure for FIPS </tutorial/configure-fips>
+For an example, see /tutorial/configure-fips.

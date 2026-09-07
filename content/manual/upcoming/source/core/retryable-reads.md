@@ -1,136 +1,107 @@
-.. _retryable-reads:
-
-===============
-Retryable Reads
-===============
-
-.. meta::
-   :description: Enable retryable reads in MongoDB drivers to automatically retry certain read operations once upon encountering network or server errors.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# Retryable Reads
 
 Retryable reads allow MongoDB drivers to automatically retry certain
-read operations a single time if they encounter certain network 
+read operations a single time if they encounter certain network
 or server errors.
 
-Prerequisites
--------------
+## Prerequisites
 
-Minimum Driver Version
-  Official MongoDB drivers compatible with MongoDB Server 6.0 and later
-  support retryable reads. 
+Minimum Driver Version  
+Official MongoDB drivers compatible with MongoDB Server 6.0 and later
+support retryable reads.
 
-  For more information on official MongoDB drivers, see
-  :driver:`MongoDB Drivers </>`.
+For more information on official MongoDB drivers, see
+`MongoDB Drivers`.
 
-Minimum Server Version
-  Drivers can only retry read operations if connected to 
-  MongoDB Server 6.0 or later.
+Minimum Server Version  
+Drivers can only retry read operations if connected to
+MongoDB Server 6.0 or later.
 
-Enabling Retryable Reads
--------------------------
+## Enabling Retryable Reads
 
 Official MongoDB drivers compatible with MongoDB Server 6.0 and later
 enable retryable reads by default. To explicitly disable retryable
-reads, specify :urioption:`retryReads=false <retryReads>` in the
-:ref:`connection string <mongodb-uri>` for the deployment.
+reads, specify `retryReads=false` in the
+connection string for the deployment.
 
-:binary:`~bin.mongosh` does not support retryable reads.
+`mongosh` does not support retryable reads.
 
-.. _retryable-read-ops:
+## Retryable Read Operations
 
-Retryable Read Operations
--------------------------
-
-MongoDB drivers support retrying the following read operations. The 
-list references a generic description of each method. For specific 
+MongoDB drivers support retrying the following read operations. The
+list references a generic description of each method. For specific
 syntax and usage, defer to the driver documentation for that method.
 
-.. list-table::
-   :header-rows: 1
+- - Methods
+  - Descriptions
 
-   * - Methods
-     - Descriptions
+- - `Collection.aggregate`  
+    `Collection.count`  
+    `Collection.countDocuments`  
+    `Collection.distinct`  
+    `Collection.estimatedDocumentCount`  
+    `Collection.find`  
+    `Database.aggregate`
 
-   * - | ``Collection.aggregate``
-       | ``Collection.count``
-       | ``Collection.countDocuments``
-       | ``Collection.distinct``
-       | ``Collection.estimatedDocumentCount``
-       | ``Collection.find``
-       | ``Database.aggregate`` 
-       
-       For ``Collection.aggregate`` and ``Database.aggregate``, drivers
-       can only retry aggregation pipelines which do **not** include
-       write stages, such as :pipeline:`$out` or :pipeline:`$merge`.
+    For `Collection.aggregate` and `Database.aggregate`, drivers
+    can only retry aggregation pipelines which do **not** include
+    write stages, such as `\$out` or `\$merge`.
 
+  - CRUD API Read Operations
 
-     - CRUD API Read Operations
+- - `Collection.watch`  
+    `Database.watch`  
+    `MongoClient.watch`
 
-   * - | ``Collection.watch``
-       | ``Database.watch``
-       | ``MongoClient.watch``
+  - Change Stream Operations
 
-     - Change Stream Operations
+- - `MongoClient.listDatabases`  
+    `Database.listCollections`  
+    `Collection.listIndexes`
 
-   * - | ``MongoClient.listDatabases``
-       | ``Database.listCollections``
-       | ``Collection.listIndexes``
-     
-     - Enumeration Operations
+  - Enumeration Operations
 
-   * - GridFS Operations backed by ``Collection.find``
-       (e.g. ``GridFSBucket.openDownloadStream``)
+\* - GridFS Operations backed by `Collection.find`  
+(e.g. `GridFSBucket.openDownloadStream`)
 
-     - GridFS File Download Operations
+- GridFS File Download Operations
 
-MongoDB drivers *may* include retryable support for other operations, 
+MongoDB drivers *may* include retryable support for other operations,
 such as helper methods or methods that wrap a retryable read operation.
-Defer to the :driver:`driver documentation </>`
+Defer to the `driver documentation`
 to determine whether a method explicitly supports retryable reads.
 
-.. seealso::
+> **See also**
+>
+> Retryable Read Specification: [Supported Read Operations](https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst#supported-read-operations)
 
-   Retryable Read Specification: `Supported Read Operations <https://github.com/mongodb/specifications/blob/master/source/retryable-reads/retryable-reads.rst#supported-read-operations>`__
-
-Unsupported Read Operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Unsupported Read Operations
 
 The following operations do *not* support retryable reads:
 
-- :method:`db.collection.mapReduce()`
-- :dbcommand:`getMore`
-- Any read command passed to a generic ``Database.runCommand`` helper,
+- `db.collection.mapReduce()`
+- `getMore`
+- Any read command passed to a generic `Database.runCommand` helper,
   which is agnostic about read or write commands.
 
-Behavior
---------
+## Behavior
 
-Persistent Network Errors
-~~~~~~~~~~~~~~~~~~~~~~~~~
+### Persistent Network Errors
 
 MongoDB retryable reads make only **one** retry attempt. This helps
 address transient network errors or
-:ref:`replica set elections <replica-set-elections>`, but not persistent
+replica set elections, but not persistent
 network errors.
 
-Failover Period
-~~~~~~~~~~~~~~~
+### Failover Period
 
-The driver performs :ref:`server selection
-<replica-set-read-preference-behavior>` using the read command's
-original :ref:`read preference <read-preference>` before retrying the
-read operation. If the driver cannot select a server 
-for the retry attempt using the original read preference, 
+The driver performs server selection using the read command's
+original read preference before retrying the
+read operation. If the driver cannot select a server
+for the retry attempt using the original read preference,
 the driver returns the original error.
 
-The drivers wait :urioption:`serverSelectionTimeoutMS` milliseconds
+The drivers wait `serverSelectionTimeoutMS` milliseconds
 before performing server selection. Retryable reads do not address
 instances where no eligible servers exist after waiting
-:urioption:`serverSelectionTimeoutMS`.
+`serverSelectionTimeoutMS`.

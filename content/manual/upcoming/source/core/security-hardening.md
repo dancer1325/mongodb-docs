@@ -1,53 +1,24 @@
-.. _network-config-hardening:
-
-================================================================
-Network and Configuration Hardening for Self-Managed Deployments
-================================================================
-
-.. default-domain:: mongodb
-
-.. meta::
-   :keywords: on-prem
-   :description: Harden your MongoDB deployment by securing network access, configuring firewalls, using VPNs, and disabling IP forwarding to reduce risk exposure.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# Network and Configuration Hardening for Self-Managed Deployments
 
 To reduce the risk exposure of the entire MongoDB system, ensure that
 only trusted hosts have access to MongoDB.
 
-.. _http-interface-security:
-.. _rest-api:
+## MongoDB Configuration Hardening
 
-MongoDB Configuration Hardening
--------------------------------
+### IP Binding
 
-IP Binding
-~~~~~~~~~~
+> **Warning**
+>
+> Make sure that your `mongod` and `mongos`
+> instances are only accessible on trusted networks. If your system
+> has more than one network interface, bind MongoDB programs to the
+> private or internal network interface.
 
-.. include:: /includes/fact-default-bind-ip-change.rst
+For more information, see /core/security-mongodb-configuration.
 
-.. include:: /includes/warning-bind-ip-security-considerations.rst
+## Network Hardening
 
-.. warning::
-
-   Make sure that your :binary:`~bin.mongod` and :binary:`~bin.mongos`
-   instances are only accessible on trusted networks. If your system
-   has more than one network interface, bind MongoDB programs to the
-   private or internal network interface.
-
-For more information, see :doc:`/core/security-mongodb-configuration`.
-
-Network Hardening
------------------
-
-.. _security-firewalls:
-
-Firewalls
-~~~~~~~~~
+### Firewalls
 
 Firewalls allow administrators to filter and control access to a system
 by providing granular control over network communications. For
@@ -55,23 +26,20 @@ administrators of MongoDB, the following capabilities are important:
 limiting incoming traffic on a specific port to specific systems and
 limiting incoming traffic from untrusted hosts.
 
-On Linux systems, the ``iptables`` interface provides access to the
-underlying ``netfilter`` firewall. On Windows systems, ``netsh``
+On Linux systems, the `iptables` interface provides access to the
+underlying `netfilter` firewall. On Windows systems, `netsh`
 command line interface provides access to the underlying Windows
 Firewall. For additional information about firewall configuration, see:
 
-- :doc:`/tutorial/configure-linux-iptables-firewall` and
-
-- :doc:`/tutorial/configure-windows-netsh-firewall`.
+- /tutorial/configure-linux-iptables-firewall and
+- /tutorial/configure-windows-netsh-firewall.
 
 For best results and to minimize overall exposure, ensure that *only*
-traffic from trusted sources can reach :binary:`~bin.mongod` and
-:binary:`~bin.mongos` instances and that the :binary:`~bin.mongod` and
-:binary:`~bin.mongos` instances can only connect to trusted outputs.
+traffic from trusted sources can reach `mongod` and
+`mongos` instances and that the `mongod` and
+`mongos` instances can only connect to trusted outputs.
 
-
-Virtual Private Networks
-~~~~~~~~~~~~~~~~~~~~~~~~
+### Virtual Private Networks
 
 Virtual private networks, or VPNs, make it possible to link two
 networks over an encrypted and limited-access trusted
@@ -85,39 +53,23 @@ clients. Furthermore, because VPNs provide a secure tunnel, by using a
 VPN connection to control access to your MongoDB instance, you can
 prevent tampering and "man-in-the-middle" attacks.
 
-Disable IP Forwarding
-~~~~~~~~~~~~~~~~~~~~~
+### Disable IP Forwarding
 
-IP forwarding allows servers to forward packets to other systems.  Disable this
-feature on servers that host :program:`mongod`.
+IP forwarding allows servers to forward packets to other systems. Disable this
+feature on servers that host `mongod`.
 
-.. tabs::
+To disable IP forwarding on Linux, use the `sysctl` command:
 
-   .. tab:: Linux
-      :tabid: linux
+```bash
+sudo sysctl -w net.ipv4.ip_forward=0
 
-      To disable IP forwarding on Linux, use the ``sysctl`` command:
+```
 
-      .. code-block:: bash
+To make the change persistent, edit the `/etc/sysctl.conf` file to add
+this line:
 
-         sudo sysctl -w net.ipv4.ip_forward=0
+```conf
+net.ipv4.ip_forward = 0
+```
 
-      To make the change persistent, edit the ``/etc/sysctl.conf`` file to add
-      this line:
-
-      .. code-block:: conf
-
-         net.ipv4.ip_forward = 0
-
-   .. tab:: Windows
-      :tabid: windows
-
-      IP forwarding is disabled by default on Windows.
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   IP Binding </core/security-mongodb-configuration>
-   Use Linux iptables  </tutorial/configure-linux-iptables-firewall>
-   Use Windows netsh </tutorial/configure-windows-netsh-firewall>
+IP forwarding is disabled by default on Windows.

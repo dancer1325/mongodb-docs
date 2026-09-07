@@ -1,54 +1,6 @@
-.. _sharding-background:
+# Sharding
 
-.. _sharding-introduction:
-
-.. _sharding-sharded-cluster:
-
-========
-Sharding
-========
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-.. meta::
-   :description: Scale MongoDB deployments horizontally. Use sharding to distribute data across multiple machines, supporting large datasets and high throughput operations.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: twocols
-
-.. dismissible-skills-card::
-   :skill: Sharding Strategies
-   :url: https://learn.mongodb.com/skills?openTab=sharding
-   
-.. toctree::
-   :titlesonly: 
-   :hidden: 
-
-   Sharded Cluster Components </core/sharded-cluster-components>
-   Shard Keys </core/sharding-shard-key>
-   Hashed Sharding </core/hashed-sharding>
-   Ranged Sharding </core/ranged-sharding>
-   Zones </core/zone-sharding>
-   Data Partitioning </core/sharding-data-partitioning>
-   Balancer </core/sharding-balancer-administration>
-   Long-Running Secondary Reads </core/long-running-secondary-reads>
-   Administration </administration/sharded-cluster-administration>
-   Reference </reference/sharding>
-   mongot Architecture Patterns </tutorial/mongot-sizing/advanced-guidance/architecture>
-   mongot Hardware </tutorial/mongot-sizing/advanced-guidance/hardware>
-   mongot Resource Allocation </tutorial/mongot-sizing/advanced-guidance/resource-allocation>
-   mongot Sizing Introduction </tutorial/mongot-sizing/introduction>
-   mongot Sizing Quickstart </tutorial/mongot-sizing/quick-start> 
-
-
-:term:`Sharding<sharding>` is a method for distributing data across multiple
+Sharding is a method for distributing data across multiple
 machines. MongoDB uses sharding to support deployments with very large data
 sets and high throughput operations.
 
@@ -77,129 +29,97 @@ which can be a lower overall cost than high-end hardware for a single machine.
 The trade off is increased complexity in infrastructure and maintenance for
 the deployment.
 
-MongoDB supports *horizontal scaling* through :term:`sharding`.
+MongoDB supports *horizontal scaling* through sharding.
 
-.. |page-topic| replace:: :atlas:`shard clusters in the UI </cluster-additional-settings/#std-label-create-cluster-sharding>`
+## Sharded Cluster
 
-.. cta-banner::
-   :url: https://www.mongodb.com/docs/atlas/cluster-additional-settings/#std-label-create-cluster-sharding
-   :icon: Cloud
-
-   .. include:: /includes/fact-atlas-compatible.rst
-
-.. _sharded-cluster:
-
-Sharded Cluster
----------------
-
-.. note::
-   
-   .. include:: /includes/fact-sharded-cluster-components.rst
+> **Note**
+>
 
 The following graphic describes the interaction of components within a
 sharded cluster:
 
-.. include:: /images/sharded-cluster-production-architecture.rst
-
-MongoDB shards data at the :term:`collection` level, distributing the
+MongoDB shards data at the collection level, distributing the
 collection data across the shards in the cluster.
 
-Shard Keys
-----------
+## Shard Keys
 
-MongoDB uses the :ref:`shard key <sharding-shard-key>` to
+MongoDB uses the shard key to
 distribute the collection's documents across shards. The shard key
-consists of a field or multiple fields in the documents. 
+consists of a field or multiple fields in the documents.
 
-Documents in sharded collections can be missing the shard key fields. Missing 
-shard key fields are treated as having null values when distributing the 
+Documents in sharded collections can be missing the shard key fields. Missing
+shard key fields are treated as having null values when distributing the
 documents across shards but not when routing queries. For more information, see
-:ref:`shard-key-missing`.
+shard-key-missing.
 
-You select the shard key when :ref:`sharding a collection
-<sharding-shard-key-creation>`.
+You select the shard key when sharding a collection.
 
-- Starting in MongoDB 5.0, you can :ref:`reshard a collection
-  <sharding-resharding>` by changing a collection's shard key.
-- You can :ref:`refine a shard key <shard-key-refine>` by adding a suffix field 
+- Starting in MongoDB 5.0, you can reshard a collection by changing a collection's shard key.
+- You can refine a shard key by adding a suffix field
   or fields to the existing shard key.
 
 A document's shard key value determines its distribution across the
-shards. You can update a document's shard key value unless your shard key field 
-is the immutable ``_id`` field. For more information, see 
-:ref:`update-shard-key`.
+shards. You can update a document's shard key value unless your shard key field
+is the immutable `_id` field. For more information, see
+update-shard-key.
 
-Shard Key Index
-~~~~~~~~~~~~~~~
+### Shard Key Index
 
 To shard a populated collection, the collection must have an
-:term:`index` that starts with the shard key. When sharding an empty
+index that starts with the shard key. When sharding an empty
 collection, MongoDB creates the supporting index if the collection does
 not already have an appropriate index for the specified shard key. See
-:ref:`sharding-shard-key-indexes`.
+sharding-shard-key-indexes.
 
-Shard Key Strategy
-~~~~~~~~~~~~~~~~~~
+### Shard Key Strategy
 
 The choice of shard key affects the performance, efficiency, and scalability
 of a sharded cluster. A cluster with the best possible hardware and
 infrastructure can be bottlenecked by the choice of shard key. The choice of
-shard key and its backing index can also affect the :ref:`sharding strategy
-<sharding-strategy>` that your cluster can use.
+shard key and its backing index can also affect the sharding strategy that your cluster can use.
 
-.. seealso::
+> **See also**
+>
+> sharding-shard-key-selection
 
-   :ref:`sharding-shard-key-selection`
+## Chunks
 
-Chunks
-------
-
-MongoDB partitions sharded data into :term:`chunks<chunk>`. Each
+MongoDB partitions sharded data into chunks. Each
 chunk has an inclusive lower and exclusive upper range based on the
-:term:`shard key`.
+shard key.
 
-Balancer and Even Data Distribution
------------------------------------
+## Balancer and Even Data Distribution
 
 In an attempt to achieve an even distribution of data across all
-shards in the cluster, a :ref:`balancer <sharding-balancing>` runs in the 
-background to migrate :term:`ranges <range>` across the :term:`shards <shard>`.
+shards in the cluster, a balancer runs in the
+background to migrate ranges across the shards.
 
-.. seealso::
+> **See also**
+>
+> sharding-range-migration
 
-   :ref:`sharding-range-migration`
+## Advantages of Sharding
 
-Advantages of Sharding
-----------------------
-
-.. _sharding-shard-key-write-scaling:
-
-Reads / Writes
-~~~~~~~~~~~~~~
+### Reads / Writes
 
 MongoDB distributes the read and write workload across the
-:term:`shards <shard>` in the :term:`sharded cluster`, allowing each shard to
+shards in the sharded cluster, allowing each shard to
 process a subset of cluster operations. Both read and write workloads can be
 scaled horizontally across the cluster by adding more shards.
 
-For queries that include the shard key or the prefix of a :term:`compound
-<compound index>` shard key, :binary:`~bin.mongos` can target the query at a
-specific shard or set of shards. These :ref:`targeted
-operations<sharding-mongos-targeted>` are generally more efficient than
-:ref:`broadcasting <sharding-mongos-broadcast>` to every shard in the cluster.
+For queries that include the shard key or the prefix of a compound shard key, `mongos` can target the query at a
+specific shard or set of shards. These targeted operations are generally more efficient than
+broadcasting to every shard in the cluster.
 
-Storage Capacity
-~~~~~~~~~~~~~~~~
+### Storage Capacity
 
-:term:`Sharding <sharding>` distributes data across the :term:`shards <shard>` in the
+Sharding distributes data across the shards in the
 cluster, allowing each shard to contain a subset of the total cluster data. As
 the data set grows, additional shards increase the storage capacity of the
 cluster.
 
-.. _sharding-availability:
-
-High Availability
-~~~~~~~~~~~~~~~~~
+### High Availability
 
 The deployment of config servers and shards as replica sets provide
 increased availability.
@@ -209,205 +129,158 @@ the sharded cluster can continue to perform partial reads and writes.
 That is, while data on the unavailable shard(s) cannot be accessed,
 reads or writes directed at the available shards can still succeed.
 
-Considerations Before Sharding
-------------------------------
+## Considerations Before Sharding
 
 Sharded cluster infrastructure requirements and complexity require
 careful planning, execution, and maintenance.
 
-While you can :ref:`reshard your collection <sharding-resharding>`
+While you can reshard your collection
 later, it is important to carefully consider your shard key choice to
 avoid scalability and performance issues.
 
-.. seealso::
-
-   :ref:`sharding-shard-key-selection`
+> **See also**
+>
+> sharding-shard-key-selection
 
 To understand the operational requirements and restrictions for sharding
-your collection, see :doc:`/core/sharded-cluster-requirements`.
+your collection, see /core/sharded-cluster-requirements.
 
 If queries do *not* include the shard key or the prefix of a
-:term:`compound <compound index>` shard key, :binary:`~bin.mongos` performs
-a :ref:`broadcast operation <sharding-mongos-broadcast>`, querying
+compound shard key, `mongos` performs
+a broadcast operation, querying
 *all* shards in the sharded cluster. These scatter/gather queries can
 be long running operations.
 
-.. include:: /includes/fact-5.1-fassert-shard-restart-add-CWWC.rst
+> **Note**
+>
+> If you have an active support contract with MongoDB, consider contacting
+> your account representative for assistance with sharded cluster
+> planning and deployment.
 
-.. note::
+### Reshard to Balance
 
-   If you have an active support contract with MongoDB, consider contacting
-   your account representative for assistance with sharded cluster
-   planning and deployment.
-
-Reshard to Balance
-~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/fact-reshard-init-shard-mongosh
-
-.. _sharded-vs-non-sharded-collections:
-
-Sharded and Non-Sharded Collections
------------------------------------
+## Sharded and Non-Sharded Collections
 
 A database can have a mixture of sharded and unsharded collections. Sharded
-collections are :term:`partitioned<data partition>` and distributed across the
-:term:`shards<shard>` in the cluster. Unsharded collections can be located 
+collections are partitioned and distributed across the
+shards in the cluster. Unsharded collections can be located
 on any shard but cannot span across shards.
 
-.. include:: /images/sharded-cluster-primary-shard.rst
+## Connecting to a Sharded Cluster
 
-Connecting to a Sharded Cluster
--------------------------------
-
-You must connect to a :term:`mongos` router to interact with any collection in
-the :term:`sharded cluster`. This includes sharded *and* unsharded
+You must connect to a mongos router to interact with any collection in
+the sharded cluster. This includes sharded *and* unsharded
 collections. Clients should *never* connect to a single shard in order to
 perform read or write operations.
 
-.. include:: /images/sharded-cluster-mixed.rst
+You can connect to a `mongos` the same way you connect to a
+`mongod` using the `mongosh` or a
+MongoDB `driver`.
 
-You can connect to a :binary:`~bin.mongos` the same way you connect to a
-:binary:`~bin.mongod` using the :binary:`~bin.mongosh` or a
-MongoDB :driver:`driver </>`.
+> **Note**
+>
 
-.. note::
-
-   .. include:: /includes/fact-cannot-connect-directly-to-shards.rst
-
-.. _sharding-strategy:
-
-Sharding Strategy
------------------
+## Sharding Strategy
 
 MongoDB supports two sharding strategies for distributing data
-across :term:`sharded clusters<sharded cluster>`.
+across sharded clusters.
 
-Hashed Sharding
-~~~~~~~~~~~~~~~
+### Hashed Sharding
 
 Hashed Sharding involves computing a hash of the shard key field's
-value. Each :term:`chunk` is then assigned a range based on the
+value. Each chunk is then assigned a range based on the
 hashed shard key values.
 
-.. include:: /includes/tip-applications-do-not-need-to-compute-hashes.rst
-
-.. include:: /images/sharding-hash-based.rst
-
 While a range of shard keys may be "close", their hashed values are unlikely
-to be on the same :term:`chunk`. Data distribution based on hashed values
+to be on the same chunk. Data distribution based on hashed values
 facilitates more even data distribution, especially in data sets where the
-shard key changes :ref:`monotonically<shard-key-monotonic>`.
+shard key changes monotonically.
 
 However, hashed distribution means that range-based queries on the shard key
 are less likely to target a single shard, resulting in more cluster wide
-:ref:`broadcast operations<sharding-mongos-broadcast>`
+broadcast operations
 
-See :doc:`/core/hashed-sharding` for more information.
+See /core/hashed-sharding for more information.
 
-Ranged Sharding
-~~~~~~~~~~~~~~~
+### Ranged Sharding
 
 Ranged sharding involves dividing data into ranges based on the
-shard key values. Each :term:`chunk` is then assigned a range based on the
+shard key values. Each chunk is then assigned a range based on the
 shard key values.
 
-.. include:: /images/sharding-range-based.rst
-
 A range of shard keys whose values are "close" are more likely to reside on
-the same :term:`chunk`. This allows for :ref:`targeted
-operations<sharding-mongos-targeted>` as a :binary:`~bin.mongos` can route the
+the same chunk. This allows for targeted operations as a `mongos` can route the
 operations to only the shards that contain the required data.
 
 The efficiency of ranged sharding depends on the shard key chosen. Poorly
 considered shard keys can result in uneven distribution of data, which can
-negate some benefits of sharding or can cause performance bottlenecks. See 
-:ref:`shard key selection for range-based sharding<sharding-ranged-shard-key>`.
+negate some benefits of sharding or can cause performance bottlenecks. See
+shard key selection for range-based sharding.
 
-See :doc:`/core/ranged-sharding` for more information.
+See /core/ranged-sharding for more information.
 
-.. _sharding-zone-sharding:
-
-Zones in Sharded Clusters
--------------------------
+## Zones in Sharded Clusters
 
 Zones can help improve the locality of data for sharded clusters that
 span multiple data centers.
 
-.. include:: /includes/intro-zone-sharding.rst
-
-Each zone covers one or more ranges of :term:`shard key` values. Each range a
+Each zone covers one or more ranges of shard key values. Each range a
 zone covers is always inclusive of its lower boundary and exclusive of its
 upper boundary.
 
-.. include:: /images/sharded-cluster-zones.rst
-
-You must use fields contained in the :term:`shard key` when defining a new
-range for a zone to cover. If using a :term:`compound <compound index>` shard
-key, the range must include the prefix of the shard key. See :ref:`shard keys
-in zones <zone-sharding-shard-key>` for more information.
+You must use fields contained in the shard key when defining a new
+range for a zone to cover. If using a compound shard
+key, the range must include the prefix of the shard key. See shard keys in zones for more information.
 
 The possible use of zones in the future should be taken into
 consideration when choosing a shard key.
 
-.. tip::
+> **Tip**
+>
+> Setting up zones and zone ranges *before* you shard an empty or a
+> non-existing collection allows for a faster setup of zoned sharding.
 
-   Setting up zones and zone ranges *before* you shard an empty or a 
-   non-existing collection allows for a faster setup of zoned sharding.
+See zones for more information.
 
-See :ref:`zones <zone-sharding>` for more information.
+## Collations in Sharding
 
-Collations in Sharding
-----------------------
-
-Use the :dbcommand:`shardCollection` command with the ``collation :
-{ locale : "simple" }`` option to shard a collection which has a
-:ref:`default collation <collation>`. Successful
+Use the `shardCollection` command with the `collation : { locale : "simple" }` option to shard a collection which has a
+default collation. Successful
 sharding requires that:
 
 - The collection must have an index whose prefix is the shard key
-- The index must have the collation ``{ locale: "simple" }``
+- The index must have the collation `{ locale: "simple" }`
 
 When creating new collections with a collation, ensure these conditions
 are met prior to sharding the collection.
 
-.. include:: /includes/note-sharding-collation.rst
-
-See :dbcommand:`shardCollection` for more information about sharding
+See `shardCollection` for more information about sharding
 and collation.
 
-Change Streams
---------------
+## Change Streams
 
-:ref:`Change streams <changeStreams>` are
+Change streams are
 available for replica sets and sharded clusters. Change streams allow
 applications to access real-time data changes without the complexity
 and risk of tailing the oplog. Applications can use change streams to
 subscribe to all data changes on a collection or collections.
 
-Transactions
-------------
+## Transactions
 
-With the introduction of :ref:`distributed transactions <transactions>`, 
+With the introduction of distributed transactions,
 multi-document transactions are available on sharded clusters.
 
-.. include:: /includes/extracts/transactions-committed-visibility.rst
+## Learn More
 
-Learn More
-----------
-
-Practical MongoDB Aggregations E-Book
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Practical MongoDB Aggregations E-Book
 
 For more information on how sharding works with
-:ref:`aggregations <aggregation-pipeline>`, read the sharding 
-chapter in the `Practical MongoDB Aggregations
-<https://www.practical-mongodb-aggregations.com/guides/sharding.html>`__
+aggregations, read the sharding
+chapter in the [Practical MongoDB Aggregations](https://www.practical-mongodb-aggregations.com/guides/sharding.html)
 e-book.
 
-Additional Information
-~~~~~~~~~~~~~~~~~~~~~~
+### Additional Information
 
-- :doc:`/core/transactions`
-- :doc:`/core/transactions-production-consideration`
-- :doc:`/core/transactions-sharded-clusters`
+- /core/transactions
+- /core/transactions-production-consideration
+- /core/transactions-sharded-clusters

@@ -1,28 +1,4 @@
-.. facet::
-   :name: programming_language
-   :values: c, cpp, csharp, go, java, javascript/typescript, perl, php, python, ruby, rust, scala
-
-.. _transactions:
-
-============
-Transactions
-============
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-.. meta:: 
-   :keywords: motor, java sync, code example, node.js, compass
-   :description: Use distributed transactions across multiple operations, collections, databases, documents, and shards for situations that require atomicity of reads and writes to multiple documents.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: twocols
+# Transactions
 
 In MongoDB, an operation on a single document is atomic. Because you can
 use embedded documents and arrays to capture relationships between data
@@ -36,766 +12,374 @@ distributed transactions. With distributed transactions,
 transactions can be used across multiple operations, collections,
 databases, documents, and shards.
 
-Transactions API
-----------------
+## Transactions API
 
-----------
+------------------------------------------------------------------------
 
-.. |arrow| unicode:: U+27A4
-
-|arrow| Use the **Select your language** drop-down menu in the
+➤ Use the **Select your language** drop-down menu in the
 upper-right to set the language of the following example.
 
-----------
+------------------------------------------------------------------------
 
-.. tabs-selector:: drivers
+> **See also**
+>
+> For an example in `mongosh`, see
+> txn-mongo-shell-example.
 
-.. tabs-drivers::
-   
-   .. tab::
-      :tabid: python
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/test_examples.py
-         :language: python
-         :dedent: 8
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: java-sync
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. code-block:: java
-          
-         /*
-           For a replica set, include the replica set name and a seedlist of the members in the URI string; e.g.
-           String uri = "mongodb://mongodb0.example.com:27017,mongodb1.example.com:27017/admin?replicaSet=myRepl";
-           For a sharded cluster, connect to the mongos instances.
-           For example:
-           String uri = "mongodb://mongos0.example.com:27017,mongos1.example.com:27017:27017/admin";
-          */
-          
-         final MongoClient client = MongoClients.create(uri);
-          
-         /*
-             Create collections.
-          */
-          
-         client.getDatabase("mydb1").getCollection("foo")
-                 .withWriteConcern(WriteConcern.MAJORITY).insertOne(new Document("abc", 0));
-         client.getDatabase("mydb2").getCollection("bar")
-                 .withWriteConcern(WriteConcern.MAJORITY).insertOne(new Document("xyz", 0));
-          
-         /* Step 1: Start a client session. */
-          
-         final ClientSession clientSession = client.startSession();
-          
-         /* Step 2: Optional. Define options to use for the transaction. */
-          
-         TransactionOptions txnOptions = TransactionOptions.builder()
-                 .writeConcern(WriteConcern.MAJORITY)
-                 .build();
-          
-         /* Step 3: Define the sequence of operations to perform inside the transactions. */
-          
-         TransactionBody txnBody = new TransactionBody<String>() {
-             public String execute() {
-                 MongoCollection<Document> coll1 = client.getDatabase("mydb1").getCollection("foo");
-                 MongoCollection<Document> coll2 = client.getDatabase("mydb2").getCollection("bar");
-          
-                 /*
-                    Important:: You must pass the session to the operations.
-                  */
-                 coll1.insertOne(clientSession, new Document("abc", 1));
-                 coll2.insertOne(clientSession, new Document("xyz", 999));
-                 return "Inserted into collections in different databases";
-             }
-         };
-         try {
-             /* 
-                Step 4: Use .withTransaction() to start a transaction, 
-                execute the callback, and commit (or abort on error).
-             */
-          
-             clientSession.withTransaction(txnBody, txnOptions);
-         } catch (RuntimeException e) {
-             // some error handling
-         } finally {
-             clientSession.close();
-         }
-
-   .. tab::
-      :tabid: nodejs
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/node_transactions.js
-         :language: javascript
-         :dedent: 4
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: php
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/DocumentationExamplesTest.php
-         :language: php
-         :dedent: 8
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: csharp
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/withTxnExample1.cs
-         :language: csharp
-         :dedent: 12
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: c
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/test-mongoc-sample-commands.c
-         :language: c
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: cpp
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/cpp-with-transaction.cpp
-         :language: cpp
-         :dedent: 4
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: motor
-       
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/test_examples_motor.py
-         :language: python
-         :dedent: 8
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: ruby
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/with_transactions_examples_spec.rb
-         :language: ruby
-         :dedent: 4
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: rust
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/mod.rs
-         :language: rust
-         :dedent: 4
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: go
-
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/go_examples.go
-         :language: go
-         :start-after: Start Transactions withTxn API Example 1
-         :end-before: End Transactions withTxn API Example 1
-
-   .. tab::
-      :tabid: perl
- 
-      .. include:: /includes/transactions/example-intro.rst
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/perl-transactions-examples.t
-         :language: perl
-         :start-after: Start Transactions Retry Example 3
-         :end-before: End Transactions Retry Example 3
-
-   .. tab::
-      :tabid: scala
-
-      This example uses the :ref:`core API <txn-core-api>`. Because the
-      core API does not incorporate retry logic for the
-      :ref:`transient-transaction-error` or
-      :ref:`unknown-transaction-commit-result` commit errors, the
-      example includes explicit logic to retry the transaction for
-      these errors:
-
-      .. include:: /includes/extracts/transactions-example-note.rst
-
-      .. literalinclude:: /driver-examples/DocumentationTransactionsExampleSpec.scala
-         :language: scala
-
-.. seealso::
-
-   For an example in :binary:`~bin.mongosh`, see
-   :ref:`txn-mongo-shell-example`.
-
-.. _transactions-atomicity:
-
-Transactions and Atomicity
---------------------------
-
-.. include:: /includes/transactions/distributed-transaction-repl-shard-support.rst
+## Transactions and Atomicity
 
 Distributed transactions are atomic:
 
 - Transactions either apply all data changes or roll back the changes.
-
 - If a transaction commits, all data changes made in the transaction
   are saved and are visible outside of the transaction.
-
-  .. include:: /includes/extracts/transactions-committed-visibility.rst
-
 - When a transaction aborts, all data changes made in the transaction
   are discarded without ever becoming visible. For example, if any
   operation in the transaction fails, the transaction aborts and all
   data changes made in the transaction are discarded without ever
   becoming visible.
 
-.. include:: /includes/extracts/transactions-usage.rst
+> **See also**
+>
+> transactions-prod-consideration-outside-reads
 
-.. seealso::
-
-   :ref:`transactions-prod-consideration-outside-reads`
-
-.. _transactions-operations:
-
-Transactions and Operations
----------------------------
+## Transactions and Operations
 
 Distributed transactions can be used across multiple operations,
 collections, databases, documents, and shards.
 
 For transactions:
 
-.. include:: /includes/extracts/transactions-operations-crud.rst
-
 For a list of operations not supported in transactions, see
-:ref:`transactions-ops-restricted`.
+transactions-ops-restricted.
 
-.. include:: /includes/extracts/transactions-operations-catalog-tip.rst
+> **See also**
+>
+> Transactions and Operations Reference
 
-.. seealso::
+### Create Collections and Indexes in a Transaction
 
-   :ref:`Transactions and Operations Reference <transactions-operations-ref>`
-
-.. _transactions-create-collections-indexes:
-
-Create Collections and Indexes in a Transaction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can perform the following operations in a :ref:`distributed
-transaction <transactions>` if the transaction is not a
+You can perform the following operations in a distributed transaction if the transaction is not a
 cross-shard write transaction:
 
 - Create collections.
-
 - Create indexes on new empty collections created earlier in the same
   transaction.
 
 When creating a collection inside a transaction:
 
-- You can :ref:`implicitly create a collection
-  <transactions-operations-ddl-implicit>`, such as with:
-
-  - an :ref:`insert operation <transactions-operations-ddl-implicit>`
+- You can implicitly create a collection, such as with:
+  - an insert operation
     for a non-existent collection, or
-
-  - an :ref:`update/findAndModify operation
-    <transactions-operations-ddl-implicit>` with ``upsert: true``
+  - an update/findAndModify operation with `upsert: true`
     for a non-existent collection.
+- You can explicitly create a collection using the `create`
+  command or its helper `db.createCollection()`.
 
-- You can :ref:`explicitly create a collection
-  <transactions-operations-ddl-explicit>` using the :dbcommand:`create`
-  command or its helper :method:`db.createCollection()`.
-
-When :ref:`creating an index inside a transaction
-<transactions-operations-ddl-explicit>` [#create-existing-index]_, the
+When creating an index inside a transaction[^1], the
 index to create must be on either:
 
 - a non-existent collection. The collection is created as part of the
   operation.
-
 - a new empty collection created earlier in the same transaction.
 
-.. [#create-existing-index]
+#### Restrictions
 
-   You can also run :method:`db.collection.createIndex()` and
-   :method:`db.collection.createIndexes()` on existing indexes to check
-   for existence. These operations return successfully without creating
-   the index.
+- 
 
-Restrictions
-````````````
-
-- .. include:: /includes/extracts/transactions-cross-shard-collection-restriction.rst
-
-- .. include:: /includes/graphLookup-sharded-coll-transaction-note.rst
+- 
 
 - For explicit creation of a collection or an index inside a
   transaction, the transaction read concern level must be
-  :readconcern:`"local"`.
-  
+  `"local"`.
+
   To explicitly create collections and indexes, use the following
   commands and methods:
 
-  .. list-table::
-     :header-rows: 1
+- - Command
+  - Method
 
-     * - Command
-       - Method
+- - `create`
+  - `db.createCollection()`
 
-     * - :dbcommand:`create`
-       - :method:`db.createCollection()`
+- - `createIndexes`
 
-     * - :dbcommand:`createIndexes`
+  - `db.collection.createIndex()`  
+    `db.collection.createIndexes()`
 
-       - | :method:`db.collection.createIndex()`
-         | :method:`db.collection.createIndexes()`
+> **See also**
+>
+> transactions-ops-restricted
 
-.. seealso::
+### Count Operation
 
-   :ref:`transactions-ops-restricted`
+### Distinct Operation
 
-.. _transactions-ops-count:
+### Informational Operations
 
-Count Operation
-~~~~~~~~~~~~~~~
+### Restricted Operations
 
-.. include:: /includes/extracts/transactions-count.rst
+> **See also**
+>
+> - txn-prod-considerations-ddl
+>
+> \- Transactions and Operations Reference
 
-.. _transactions-ops-distinct:
-
-Distinct Operation
-~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/transactions-distinct.rst
-
-.. _transactions-ops-info:
-
-Informational Operations
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/transactions-operations-restrictions-info.rst
-
-.. _transactions-ops-restricted:
-
-Restricted Operations
-~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/transactions-operations-restrictions.rst
-
-.. seealso::
-
-   - :ref:`txn-prod-considerations-ddl`
-
-   - :ref:`Transactions and Operations Reference <transactions-operations-ref>`
-
-Transactions and Sessions
--------------------------
+## Transactions and Sessions
 
 - Transactions are associated with a session.
-
 - You can have at most one open transaction at a time for a session.
-
 - When using the drivers, each operation in the transaction must be
   associated with the session. Refer to your driver specific
   documentation for details.
-
 - If a session ends and it has an open transaction, the transaction
   aborts.
 
-.. _transaction-options:
+## Read Concern/Write Concern/Read Preference
 
-Read Concern/Write Concern/Read Preference
-------------------------------------------
+### Transactions and Read Preference
 
-.. _transactions-read-preference:
+Operations in a transaction use the transaction-level read preference.
 
-Transactions and Read Preference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Operations in a transaction use the transaction-level :ref:`read
-preference <replica-set-read-preference>`.
-
-Using the drivers, you can set the transaction-level :ref:`read
-preference <replica-set-read-preference>` at the transaction start:
+Using the drivers, you can set the transaction-level read preference at the transaction start:
 
 - If the transaction-level read preference is unset, the transaction
   uses the session-level read preference.
-
 - If transaction-level and the session-level read preference are unset,
   the transaction uses the client-level read preference. By default,
-  the client-level read preference is :readmode:`primary`.
+  the client-level read preference is `primary`.
 
-.. include:: /includes/extracts/transactions-read-pref.rst
+### Transactions and Read Concern
 
-.. _transactions-read-concern:
-
-Transactions and Read Concern
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Operations in a transaction use the transaction-level :doc:`read
-concern </reference/read-concern>`. This means a read concern set at
+Operations in a transaction use the transaction-level read concern. This means a read concern set at
 the collection and database level is ignored inside the transaction.
 
-You can set the transaction-level :doc:`read concern
-</reference/read-concern>` at the transaction start.
+You can set the transaction-level read concern at the transaction start.
 
 - If the transaction-level read concern is unset, the transaction-level
   read concern defaults to the session-level read concern.
-
 - If transaction-level and the session-level read concern are unset,
   the transaction-level read concern defaults to the client-level read
   concern. By default, the client-level read concern is
-  :readconcern:`"local"` for reads on the primary. See also:
-
-  - :ref:`transactions-read-preference`
-  - :doc:`/reference/mongodb-defaults`
+  `"local"` for reads on the primary. See also:
+  - transactions-read-preference
+  - /reference/mongodb-defaults
 
 Transactions support the following read concern levels:
 
-``"local"``
-```````````
+#### `"local"`
 
-- Read concern :readconcern:`"local"` returns the most recent data
+- Read concern `"local"` returns the most recent data
   available from the node but can be rolled back.
-
-- .. include:: /includes/transactions/read-isolation-levels.rst
-
-- For transactions on sharded cluster, :readconcern:`"local"` read
+- 
+- For transactions on sharded cluster, `"local"` read
   concern cannot guarantee that the data is from the same snapshot
   view across the shards. If snapshot isolation is required, use
-  :ref:`transactions-read-concern-snapshot` read concern.
+  transactions-read-concern-snapshot read concern.
+- 
 
-- .. include:: /includes/extracts/transactions-create-collections-read-concern.rst
+#### `"majority"`
 
-``"majority"``
-``````````````
-
-- If the transaction commits with :ref:`write concern "majority"
-  <transactions-write-concern>`, read concern :readconcern:`"majority"`
+- If the transaction commits with write concern "majority", read concern `"majority"`
   returns data that has been acknowledged by a majority of the replica
   set members and can't be rolled back. Otherwise, read concern
-  :readconcern:`"majority"` provides no guarantees that read operations
+  `"majority"` provides no guarantees that read operations
   read majority-committed data.
-
 - For transactions on sharded cluster, read concern
-  :readconcern:`"majority"` can't guarantee that the data is from the 
+  `"majority"` can't guarantee that the data is from the
   same snapshot view across the shards. If snapshot isolation is
-  required, use read concern :ref:`transactions-read-concern-snapshot`.
+  required, use read concern transactions-read-concern-snapshot.
 
-.. _transactions-read-concern-snapshot:
+#### `"snapshot"`
 
-``"snapshot"``
-``````````````
-
-- Read concern :readconcern:`"snapshot"` returns data from a
+- Read concern `"snapshot"` returns data from a
   snapshot of majority committed data **if** the transaction commits
-  with :ref:`write concern "majority" <transactions-write-concern>`.
-
-- If the transaction does not use :ref:`write concern "majority"
-  <transactions-write-concern>` for the commit, the
-  :readconcern:`"snapshot"` read concern provides **no** guarantee that
+  with write concern "majority".
+- If the transaction does not use write concern "majority" for the commit, the
+  `"snapshot"` read concern provides **no** guarantee that
   read operations used a snapshot of majority-committed data.
-
 - For transactions on sharded clusters, the
-  :readconcern:`"snapshot"` view of the data **is** synchronized
+  `"snapshot"` view of the data **is** synchronized
   across shards.
 
-.. _transactions-write-concern:
+### Transactions and Write Concern
 
-Transactions and Write Concern
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Transactions use the transaction-level :doc:`write concern
-</reference/write-concern>` to commit the write operations. Write
+Transactions use the transaction-level write concern to commit the write operations. Write
 operations inside transactions must be run without an explicit write
 concern specification and use the default write concern. At commit
 time, the writes committed using the transaction-level write
 concern.
 
-.. tip::
+> **Tip**
+>
+> Don't explicitly set the write concern for the individual write
+> operations inside a transaction. Setting write concerns for the
+> individual write operations inside a transaction returns an error.
 
-   Don't explicitly set the write concern for the individual write
-   operations inside a transaction. Setting write concerns for the
-   individual write operations inside a transaction returns an error.
-
-You can set the transaction-level :doc:`write concern
-</reference/write-concern>` at the transaction start:
+You can set the transaction-level write concern at the transaction start:
 
 - If the transaction-level write concern is unset, the
   transaction-level write concern defaults to the session-level write
   concern for the commit.
-
 - If the transaction-level write concern and the session-level write
   concern are unset, the transaction-level write concern defaults to the
   client-level write concern of:
+  - `w: "majority"` in MongoDB 5.0 and later,
+    with differences for deployments containing arbiters. See
+    wc-default-behavior.
+  - `w: 1 \<\<number\>\>`
 
-  - :writeconcern:`w: "majority" <"majority">` in MongoDB 5.0 and later,
-    with differences for deployments containing :ref:`arbiters
-    <replica-set-arbiter-configuration>`. See
-    :ref:`wc-default-behavior`.
+> **See also**
+>
+> /reference/mongodb-defaults
 
-  - :writeconcern:`w: 1 <\<number\>>`
-
-.. seealso::
-
-   :doc:`/reference/mongodb-defaults`
-
-Transactions support all write concern :ref:`w <wc-w>`
+Transactions support all write concern w
 values, including:
 
-``w: 1``
-````````
+#### `w: 1`
 
-- Write concern :writeconcern:`w: 1 <\<number\>>` returns
+- Write concern `w: 1 \<\<number\>\>` returns
   acknowledgment after the commit has been applied to the primary.
 
-  .. important::
+> **Important**
+>
+> When you commit with `w: 1 \<\<number\>\>`, your
+> transaction can be rolled back if there is a failover.
 
-     When you commit with :writeconcern:`w: 1 <\<number\>>`, your
-     transaction can be :doc:`rolled back if there is a failover
-     </core/replica-set-rollbacks>`.
-
-- When you commit with :writeconcern:`w: 1 <\<number\>>` write
-  concern, transaction-level :readconcern:`"majority"` read concern
+- When you commit with `w: 1 \<\<number\>\>` write
+  concern, transaction-level `"majority"` read concern
   provides **no** guarantees that read operations in the transaction
   read majority-committed data.
-
-- When you commit with :writeconcern:`w: 1 <\<number\>>` write
-  concern, transaction-level :readconcern:`"snapshot"` read concern
+- When you commit with `w: 1 \<\<number\>\>` write
+  concern, transaction-level `"snapshot"` read concern
   provides **no** guarantee that read operations in the transaction
   used a snapshot of majority-committed data.
 
-``w: "majority"``
-`````````````````
+#### `w: "majority"`
 
-- Write concern :writeconcern:`w: "majority" <"majority">` returns
+- Write concern `w: "majority"` returns
   acknowledgment after the commit has been applied to a majority of
   voting members.
-
-- When you commit with :writeconcern:`w: "majority" <"majority">`
-  write concern, transaction-level :readconcern:`"majority"` read
+- When you commit with `w: "majority"`
+  write concern, transaction-level `"majority"` read
   concern guarantees that operations have read majority-committed
   data. For transactions on sharded clusters, this view of the
   majority-committed data is not synchronized across shards.
-
-- When you commit with :writeconcern:`w: "majority" <"majority">`
-  write concern, transaction-level :readconcern:`"snapshot"` read
+- When you commit with `w: "majority"`
+  write concern, transaction-level `"snapshot"` read
   concern guarantees that operations have read from a synchronized
   snapshot of majority-committed data.
 
-.. note::
+> **Note**
+>
+> Regardless of the write concern specified for the transaction, the driver applies
+> `w: "majority"` as the write concern when
+> retrying `commitTransaction`.
 
-   .. include:: /includes/extracts/transactions-sharded-clusters-commit-writeconcern.rst
-
-   .. include:: /includes/return-commit-decision-parameter.rst
-
-   .. include:: /includes/write-concern-majority-and-transactions.rst
-
-   Regardless of the :ref:`write concern specified for the
-   transaction <transactions-write-concern>`, the driver applies
-   :writeconcern:`w: "majority" <"majority">` as the write concern when
-   retrying :dbcommand:`commitTransaction`.
-
-General Information
--------------------
+## General Information
 
 The following sections describe more considerations for transactions.
 
-Production Considerations
-~~~~~~~~~~~~~~~~~~~~~~~~~
+### Production Considerations
 
 For transactions in production environments, see
-:ref:`production-considerations`. In addition, for sharded
-clusters, see :ref:`production-considerations-sharded`.
+production-considerations. In addition, for sharded
+clusters, see production-considerations-sharded.
 
-Arbiters
-~~~~~~~~
+### Arbiters
 
-.. include:: /includes/extracts/transactions-arbiters.rst
+### Shard Configuration Restriction
 
-.. _transactions-wcmajority-disabled:
+> **Note**
+>
 
-Shard Configuration Restriction
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/transactions-shards-wcmajority-disabled.rst
-
-.. note::
-
-   .. include:: /includes/extracts/transactions-sharded-clusters-commit-writeconcern.rst
-
-Diagnostics
-~~~~~~~~~~~
+### Diagnostics
 
 To obtain transaction status and metrics, use the following methods:
 
-.. list-table::
-   :widths: 40 60
-   :header-rows: 1
+- - Source
+  - Returns
 
-   * - Source
-     - Returns
+- - `db.serverStatus()` method  
+    `serverStatus` command
 
-   * - | :method:`db.serverStatus()` method
-       | :dbcommand:`serverStatus` command
-   
-     - Returns :ref:`server-status-transactions` metrics.
+  - Returns server-status-transactions metrics.
 
-       Some ``serverStatus`` response fields are not returned on 
-       {+atlas+} Free clusters or {+flex-clusters+}. For more information, see 
-       :ref:`free-shard-commands-with-limits` in the {+atlas+} 
-       documentation.
-  
-   * - :pipeline:`$currentOp` aggregation pipeline
-   
-     - Returns:
-     
-       - :data:`$currentOp.transaction` if an operation is part of a
-         transaction.
-        
-       - Information on :ref:`inactive sessions
-         <currentOp-stage-idleSessions>` that are holding locks as part
-         of a transaction.
+    Some `serverStatus` response fields are not returned on
+    {+atlas+} Free clusters or {+flex-clusters+}. For more information, see
+    free-shard-commands-with-limits in the {+atlas+}
+    documentation.
 
-       - :data:`$currentOp.twoPhaseCommitCoordinator` metrics for
-         sharded transactions that involves writes to multiple shards.
+- - `\$currentOp` aggregation pipeline
+  - Returns:
+    - `\$currentOp.transaction` if an operation is part of a
+      transaction.
+    - Information on inactive sessions that are holding locks as part
+      of a transaction.
+    - `\$currentOp.twoPhaseCommitCoordinator` metrics for
+      sharded transactions that involves writes to multiple shards.
 
-   * - | :method:`db.currentOp()` method
-       | :dbcommand:`currentOp` command
+- - `db.currentOp()` method  
+    `currentOp` command
 
-     - Returns:
-     
-       - :data:`currentOp.transaction` if an operation is part of a
-         transaction.
-         
-       - :data:`currentOp.twoPhaseCommitCoordinator` metrics for
-         sharded transactions that involves writes to multiple shards.
+  - Returns:
+    - `currentOp.transaction` if an operation is part of a
+      transaction.
+    - `currentOp.twoPhaseCommitCoordinator` metrics for
+      sharded transactions that involves writes to multiple shards.
 
-   * - :binary:`~bin.mongod` and :binary:`~bin.mongos` log messages
+- - `mongod` and `mongos` log messages
+  - Includes information on slow transactions (which are transactions
+    that exceed the `operationProfiling.slowOpThresholdMs`
+    threshold) in the `TXN` log component.
 
-     - Includes information on slow transactions (which are transactions
-       that exceed the :setting:`operationProfiling.slowOpThresholdMs`
-       threshold) in the :data:`TXN` log component.
+### Feature Compatibility Version (FCV)
 
-..  _transactions-fcv:
-
-Feature Compatibility Version (FCV)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To use transactions, the :ref:`featureCompatibilityVersion <view-fcv>`
+To use transactions, the featureCompatibilityVersion
 for all members of the deployment must be at least:
 
-.. list-table::
-   :header-rows: 1
+- - Deployment
+  - Minimum `featureCompatibilityVersion`
+- - Replica Set
+  - `4.0`
 
-   * - Deployment
-     - Minimum ``featureCompatibilityVersion``
-
-   * - Replica Set
-     - ``4.0``
-
-   * - Sharded Cluster
-     - ``4.2``
+\* - Sharded Cluster  
+- `4.2`
 
 To check the FCV for a member, connect to the member and run the
 following command:
 
-.. code-block:: javascript
+```javascript
+db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
 
-   db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
+```
 
 For more information, see the
-:dbcommand:`setFeatureCompatibilityVersion` reference page.
+`setFeatureCompatibilityVersion` reference page.
 
-.. _transactions-storage-engines:
+### Storage Engines
 
-Storage Engines
-~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/transactions-inmemory-txn-page.rst
-
-Limit Critical Section Wait Time
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Limit Critical Section Wait Time
 
 Starting in MongoDB 5.2 (and 5.0.4):
 
-- When a query accesses a shard, a :ref:`chunk migration
-  <migrate-chunks-sharded-cluster>` or :ref:`DDL operation
-  <transactions-operations-ddl>` may hold the critical section for the
+- When a query accesses a shard, a chunk migration or DDL operation may hold the critical section for the
   collection.
-
 - To limit the time a shard waits for a critical section within a
   transaction, use the
-  :parameter:`metadataRefreshInTransactionMaxWaitMS` parameter.
+  `metadataRefreshInTransactionMaxWaitMS` parameter.
 
-  .. note::
-    
-     .. include:: /includes/transaction-wait-time-parameter-deprecated.rst
+> **Note**
+>
 
-Learn More
-----------
+## Learn More
 
-- :doc:`/core/transactions-in-applications`
-- :doc:`/core/transactions-production-consideration`
-- :doc:`/core/transactions-sharded-clusters`
-- :doc:`/core/transactions-operations`
-   
-.. toctree::
-   :titlesonly:
-   :hidden:
-   
-   Drivers API </core/transactions-in-applications>
-   Operations </core/transactions-operations>
-   Production Considerations </core/transactions-production-consideration>
-   Sharded Clusters </core/transactions-sharded-clusters>
+- /core/transactions-in-applications
+- /core/transactions-production-consideration
+- /core/transactions-sharded-clusters
+- /core/transactions-operations
+
+[^1]: You can also run `db.collection.createIndex()` and
+    `db.collection.createIndexes()` on existing indexes to check
+    for existence. These operations return successfully without creating
+    the index.

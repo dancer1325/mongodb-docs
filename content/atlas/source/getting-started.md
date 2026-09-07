@@ -1,29 +1,10 @@
-:orphan:
+* goal
+  * how to -- , via Atlas CLI OR Atlas UI, -- 
+    * create an Atlas cluster
+    * connect to an Atlas cluster
+    * load sample data | Atlas cluster 
 
-.. _atlas-getting-started:
-
-======================
-Get Started with Atlas
-======================
-
-.. default-domain:: mongodb
-
-.. meta:: 
-   :description: How to create an Atlas cluster, connect to it, and load sample data using the Atlas CLI or user interface.
-   :keywords: atlas cli, atlas ui
-
-.. facet::
-   :name: genre
-   :values: tutorial
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-Overview
---------
+## Overview
 
 |service-fullname| provides an easy way to host and manage your data in
 the cloud. This tutorial guides you through creating an |service|

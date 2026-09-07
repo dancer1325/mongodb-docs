@@ -1,103 +1,68 @@
-.. _replica-set-oplog:
+# Replica Set Oplog
 
-=================
-Replica Set Oplog
-=================
-
-.. meta::
-   :description: Understand the role and management of the oplog in MongoDB replica sets, including its size, retention, and application behavior.
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-The :term:`oplog` (operations log) is a special :term:`capped
-collection` that keeps a rolling record of all operations that modify
+The oplog (operations log) is a special capped collection that keeps a rolling record of all operations that modify
 the data stored in your databases. If write operations do not modify any
-data or fail, they do not create oplog entries. 
+data or fail, they do not create oplog entries.
 
 Unlike other capped collections, the oplog
 can grow past its configured size limit to avoid deleting the
-:data:`majority commit point <replSetGetStatus.optimes.lastCommittedOpTime>`.
+`majority commit point`.
 
 MongoDB applies database operations
-on the :term:`primary` and then records the operations on the
-primary's oplog. The :term:`secondary` members then copy and apply
+on the primary and then records the operations on the
+primary's oplog. The secondary members then copy and apply
 these operations in an asynchronous process. All
 replica set members contain a copy of the oplog, in the
-:data:`local.oplog.rs` collection, which allows them to maintain the
+`local.oplog.rs` collection, which allows them to maintain the
 current state of the database.
 
 To facilitate replication, all replica set members send heartbeats
-(pings) to all other members. Any :term:`secondary` member can import
+(pings) to all other members. Any secondary member can import
 oplog entries from any other member.
 
-Each operation in the oplog is :term:`idempotent`. That is, oplog
+Each operation in the oplog is idempotent. That is, oplog
 operations produce the same results whether applied once or multiple
 times to the target dataset.
 
-.. _replica-set-oplog-sizing:
-
-Oplog Size
-----------
+## Oplog Size
 
 When you start a replica set member for the first time, MongoDB creates
 an oplog of a default size if you do not specify the oplog size.
 
-For Unix and Windows systems
-   The default oplog size depends on the storage engine:
+For Unix and Windows systems  
+The default oplog size depends on the storage engine:
 
-   .. list-table::
-      :widths: 50 50
-      :header-rows: 1
+\* - Storage Engine  
+- Default Oplog Size
 
-      * - Storage Engine
-        - Default Oplog Size
+- - storage-wiredtiger
+  - 5% of free disk space
 
-      * - :ref:`storage-wiredtiger`
+- - storage-inmemory
 
-        - 5% of free disk space
+  \- 5% of physical memory  
+  The default oplog size has the following constraints:
 
-      * - :ref:`storage-inmemory`
+  - The minimum oplog size is 990 MB. If 5% of free disk space or
+    physical memory (whichever is applicable based on your storage
+    engine) is less than 990 MB, the default oplog size is 990 MB.
+  - The maximum default oplog size is 50 GB. If 5% of free disk space or
+    physical memory (whichever is applicable based on your storage
+    engine) is greater than 50 GB, the default oplog size is 50 GB.
 
-        - 5% of physical memory
+For 64-bit macOS systems  
+The default oplog size is 192 MB of either free disk space or
+physical memory depending on the storage engine:
 
-   The default oplog size has the following constraints:
+\* - Storage Engine  
+- Default Oplog Size
 
-   - The minimum oplog size is 990 MB. If 5% of free disk space or
-     physical memory (whichever is applicable based on your storage
-     engine) is less than 990 MB, the default oplog size is 990 MB.
+- - storage-wiredtiger
+  - 192 MB of free disk space
 
-   - The maximum default oplog size is 50 GB. If 5% of free disk space or
-     physical memory (whichever is applicable based on your storage
-     engine) is greater than 50 GB, the default oplog size is 50 GB.
+\* - storage-inmemory
 
-For 64-bit macOS systems
-   The default oplog size is 192 MB of either free disk space or
-   physical memory depending on the storage engine:
-   
-   .. list-table::
-      :widths: 50 50
-      :header-rows: 1
-
-      * - Storage Engine
-        - Default Oplog Size
-
-      * - :ref:`storage-wiredtiger`
-
-        - 192 MB of free disk space
-
-      * - :ref:`storage-inmemory`
-
-        - 192 MB of physical memory
+> - 192 MB of physical memory
 
 In most cases, the default oplog size is sufficient. For example, if an
 oplog is 5% of free disk space and fills up in 24 hours of operations,
@@ -106,49 +71,36 @@ hours without becoming too stale to continue replicating. However, most
 replica sets have much lower operation volumes, and their oplogs can
 hold much higher numbers of operations.
 
-Before :binary:`~bin.mongod` creates an oplog, you can specify its size with
-the :setting:`~replication.oplogSizeMB` option. Once you have started a
+Before `mongod` creates an oplog, you can specify its size with
+the `oplogSizeMB` option. Once you have started a
 replica set member for the first time, use the
-:dbcommand:`replSetResizeOplog` administrative command to change the 
-oplog size. :dbcommand:`replSetResizeOplog` enables you to resize the 
-oplog dynamically without restarting the :binary:`~bin.mongod` process.
+`replSetResizeOplog` administrative command to change the
+oplog size. `replSetResizeOplog` enables you to resize the
+oplog dynamically without restarting the `mongod` process.
 
-.. _replica-set-minimum-oplog-size:
-
-Minimum Oplog Retention Period
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/extracts/4.4-changes-minimum-oplog-retention-period.rst
+### Minimum Oplog Retention Period
 
 To configure the minimum oplog retention period when starting the
-:binary:`~bin.mongod`, either:
+`mongod`, either:
 
-- Add the :setting:`storage.oplogMinRetentionHours` setting to the 
-  :binary:`~bin.mongod` :ref:`configuration
-  file <configuration-options>`.
+- Add the `storage.oplogMinRetentionHours` setting to the
+  `mongod` configuration file.
 
   *-or-*
 
-- Add the :option:`--oplogMinRetentionHours 
-  <mongod --oplogMinRetentionHours>` command line option.
+- Add the `--oplogMinRetentionHours` command line option.
 
 To configure the minimum oplog retention period on a running
-:binary:`~bin.mongod`, use :dbcommand:`replSetResizeOplog`. Setting
-the minimum oplog retention period while the :binary:`~bin.mongod`
+`mongod`, use `replSetResizeOplog`. Setting
+the minimum oplog retention period while the `mongod`
 is running overrides any values set on startup. You must update
 the value of the corresponding configuration file setting or
 command line option to persist those changes through a server
 restart.
 
-Oplog Window
-~~~~~~~~~~~~
+### Oplog Window
 
-.. include:: /includes/replication/fact-oplog-window-definition.rst
-
-.. _replica-set-large-oplog-required:
-
-Workloads that Might Require a Larger Oplog Size
-------------------------------------------------
+## Workloads that Might Require a Larger Oplog Size
 
 If you can predict your replica set's workload to resemble one of the
 following patterns, then you might want to create an oplog that is
@@ -158,101 +110,82 @@ may be sufficient.
 
 The following workloads might require a larger oplog size.
 
-Updates to Multiple Documents at Once
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Updates to Multiple Documents at Once
 
 The oplog must translate multi-updates into individual operations in
-order to maintain :term:`idempotency <idempotent>`. This can use a great
+order to maintain idempotency. This can use a great
 deal of oplog space without a corresponding increase in data size or disk
 use.
 
-Deletions Equal the Same Amount of Data as Inserts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Deletions Equal the Same Amount of Data as Inserts
 
 If you delete roughly the same amount of data as you insert, the
 database will not grow significantly in disk use, but the size
 of the operation log can be quite large.
 
-Significant Number of In-Place Updates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Significant Number of In-Place Updates
 
 If a significant portion of the workload is updates that do not
 increase the size of the documents, the database records a large number
 of operations but does not change the quantity of data on disk.
 
-Oplog Status
-------------
+## Oplog Status
 
 To view oplog status, including the size and the time range of
-operations, issue the :method:`rs.printReplicationInfo()` method. For
+operations, issue the `rs.printReplicationInfo()` method. For
 more information on oplog status, see
-:ref:`replica-set-troubleshooting-check-oplog-size`.
+replica-set-troubleshooting-check-oplog-size.
 
-Replication Lag and Flow Control
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Replication Lag and Flow Control
 
-Under various exceptional situations, updates to a :term:`secondary's
-<secondary>` oplog might lag behind the desired performance time.  Use
-:method:`db.getReplicationInfo()` from a secondary member and the
-replication status output to assess the current state of replication and 
+Under various exceptional situations, updates to a secondary's oplog might lag behind the desired performance time. Use
+`db.getReplicationInfo()` from a secondary member and the
+replication status output to assess the current state of replication and
 determine if there is any unintended replication delay.
 
-.. include:: /includes/extracts/4.2-changes-flow-control-general-desc.rst
-
-See :ref:`Replication Lag <replica-set-replication-lag>` for more
+See Replication Lag for more
 information.
 
-.. _slow-oplog-application:
-
-Slow Oplog Application
-----------------------
+## Slow Oplog Application
 
 Secondary members of a replica set log oplog entries that take
 longer than the slow operation threshold to apply. These messages are
-:option:`logged <mongod --logpath>` for the secondaries under the
-:data:`REPL` component with the text ``applied op: <oplog entry> took
-<num>ms``.
+`logged` for the secondaries under the
+`REPL` component with the text `applied op: <oplog entry> took <num>ms`.
 
-.. code-block:: none
+```none
+2018-11-16T12:31:35.886-05:00 I REPL   [repl writer worker 13] applied op: command { ... }, took 112ms
 
-   2018-11-16T12:31:35.886-05:00 I REPL   [repl writer worker 13] applied op: command { ... }, took 112ms
+```
 
 The slow oplog application logging on secondaries are:
 
 - Not affected by the
-  :parameter:`logLevel`/:setting:`systemLog.verbosity` level (or the
-  :setting:`systemLog.component.replication.verbosity` level); i.e. for
+  `logLevel`/\`systemLog.verbosity\` level (or the
+  `systemLog.component.replication.verbosity` level); i.e. for
   oplog entries, the secondary logs only the slow oplog entries.
   Increasing the verbosity level does not log all oplog entries.
-
-- Not captured by the :doc:`profiler
-  </tutorial/manage-the-database-profiler>` and not affected by the
+- Not captured by the profiler and not affected by the
   profiling level.
 
-For more information on setting the slow operation threshold, see 
+For more information on setting the slow operation threshold, see
 
-- :option:`mongod --slowms`
-
-- :setting:`~operationProfiling.slowOpThresholdMs`
-
-- The :dbcommand:`profile` command or :method:`db.setProfilingLevel()`
+- `mongod --slowms`
+- `slowOpThresholdMs`
+- The `profile` command or `db.setProfilingLevel()`
   shell helper method.
 
-.. _oplog-coll-behavior:
+## Oplog Collection Behavior
 
-Oplog Collection Behavior
--------------------------
-
-You cannot :dbcommand:`drop` the ``local.oplog.rs`` collection from any 
-replica set member if your MongoDB deployment uses the :ref:`WiredTiger 
-Storage Engine <storage-wiredtiger>`. You cannot drop 
-the ``local.oplog.rs`` collection from a standalone MongoDB instance.
-:binary:`~bin.mongod` requires the oplog for
-both :ref:`replication` and recovery of a node if the node goes down.
+You cannot `drop` the `local.oplog.rs` collection from any
+replica set member if your MongoDB deployment uses the WiredTiger Storage Engine. You cannot drop
+the `local.oplog.rs` collection from a standalone MongoDB instance.
+`mongod` requires the oplog for
+both replication and recovery of a node if the node goes down.
 
 Starting in MongoDB 5.0, it is no longer possible to perform manual
-write operations to the :ref:`oplog <replica-set-oplog>` on a
-cluster running as a :ref:`replica set <replication>`. Performing write
+write operations to the oplog on a
+cluster running as a replica set. Performing write
 operations to the oplog when running as a
-:term:`standalone instance <standalone>` should only be done with
+standalone instance should only be done with
 guidance from MongoDB Support.

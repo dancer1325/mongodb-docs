@@ -1,27 +1,4 @@
-.. _indexes:
-
-=======
-Indexes
-=======
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre
-   :values: reference
-
-.. meta:: 
-   :description: Create and manage indexes on collections to improve query performance.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-   
-.. dismissible-skills-card::
-   :skill: Indexing Design Fundamentals
-   :url: https://learn.mongodb.com/skills?openTab=indexes
+# Indexes
 
 Indexes support efficient execution of queries in MongoDB. Without
 indexes, MongoDB must scan every document in a collection to return
@@ -33,57 +10,40 @@ performance impact for write operations. For collections with a high
 write-to-read ratio, indexes are expensive because each insert must also
 update any indexes.
 
-Use Cases
----------
+## Use Cases
 
 If your application is repeatedly running queries on the same fields,
 you can create an index on those fields to improve performance. For
 example, consider the following scenarios:
 
-.. TODO: Add wildcard index scenario to the following table
+- - Scenario
+  - Index Type
+- - A human resources department often needs to look up employees by
+    employee ID. You can create an index on the employee ID field to
+    improve query performance.
+  - Single Field Index
+- - A salesperson often needs to look up client information by
+    location. Location is stored in an embedded object with fields
+    like `state`, `city`, and `zipcode`. You can create an
+    index on the `location` object to improve performance for
+    queries on that object.
+  - Single Field Index on an embedded
+    document
 
-.. list-table::
-   :header-rows: 1 
-   :widths: 20 10
+\* - A grocery store manager often needs to look up inventory items by  
+name and quantity to determine which items are low stock. You can
+create a single index on both the `item` and `quantity`
+fields to improve query performance.
 
-   * - Scenario
+- Compound Index
 
-     - Index Type
+## Get Started
 
-   * - A human resources department often needs to look up employees by
-       employee ID. You can create an index on the employee ID field to
-       improve query performance.
-
-     - :ref:`Single Field Index <indexes-single-field>`
-
-   * - A salesperson often needs to look up client information by
-       location. Location is stored in an embedded object with fields
-       like ``state``, ``city``, and ``zipcode``. You can create an
-       index on the ``location`` object to improve performance for
-       queries on that object.
-
-       .. include:: /includes/indexes/embedded-object-need-entire-doc.rst
-
-     - :ref:`Single Field Index <indexes-single-field>` on an embedded
-       document
-
-   * - A grocery store manager often needs to look up inventory items by
-       name and quantity to determine which items are low stock. You can
-       create a single index on both the ``item`` and ``quantity``
-       fields to improve query performance.
-
-     - :ref:`Compound Index <index-type-compound>` 
-
-Get Started
------------
-
-You can create and manage indexes in `{+atlas+} 
-<https://www.mongodb.com/docs/atlas>`__, with a driver
+You can create and manage indexes in [{+atlas+}](https://www.mongodb.com/docs/atlas), with a driver
 method, or with the MongoDB Shell. {+atlas+} is the fully
 managed service for MongoDB deployments in the cloud.
 
-Create and Manage Indexes in {+atlas+}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Create and Manage Indexes in {+atlas+}
 
 For deployments hosted in {+atlas+}, you can create
 and manage indexes with the {+atlas+} UI or the Atlas CLI. {+atlas+}
@@ -92,30 +52,26 @@ slow queries, ranks suggested indexes by impact, and recommends which
 indexes to drop.
 
 To learn how to create and manage indexes the {+atlas+} UI or the Atlas
-CLI, see :atlas:`Create, View, Drop, and Hide Indexes 
-</atlas-ui/indexes>`.
+CLI, see Create, View, Drop, and Hide Indexes.
 
 To learn more about the {+atlas+} Performance Advisor, see
-:atlas:`Monitor and Improve Slow Queries </performance-advisor>`.
+Monitor and Improve Slow Queries.
 
-Create and Manage Indexes with a Driver Method or the MongoDB Shell
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Create and Manage Indexes with a Driver Method or the MongoDB Shell
 
 You can create and manage indexes with a driver method or the MongoDB
 Shell. To learn more, see the following resources:
 
-- :ref:`manual-create-an-index`
-- :ref:`index-create-compound`
-- :ref:`index-create-multikey-basic`
-- :ref:`Create an Index to Support Geospatial Queries
-  <geospatial-index>`
+- manual-create-an-index
+- index-create-compound
+- index-create-multikey-basic
+- Create an Index to Support Geospatial Queries
 
-Details
--------
+## Details
 
 Indexes are special data structures that store a small portion of the
 collection's data set in an easy-to-traverse form. MongoDB indexes use a
-:wikipedia:`B-tree <B-tree>` data structure.
+B-tree data structure.
 
 The index stores the value of a specific field or set of fields, ordered
 by the value of the field. The ordering of the index entries supports
@@ -123,82 +79,54 @@ efficient equality matches and range-based query operations. In
 addition, MongoDB can return sorted results using the ordering in the
 index.
 
-Restrictions
-~~~~~~~~~~~~
+### Restrictions
 
 Certain restrictions apply to indexes, such as the length of the index
 keys or the number of indexes per collection. For details, see
-:ref:`Index Limitations <index-limitations>`.
+Index Limitations.
 
-.. _index-type-id:
+### Default Index
 
-Default Index
-~~~~~~~~~~~~~
-
-MongoDB creates a :ref:`unique index <index-type-unique>` on the
-:ref:`_id <document-id-field>` field during the creation of a
-collection. The ``_id`` index prevents clients from inserting two
-documents with the same value for the ``_id`` field. You cannot drop
+MongoDB creates a unique index on the
+<span id="id">id</span> field during the creation of a
+collection. The `_id` index prevents clients from inserting two
+documents with the same value for the `_id` field. You cannot drop
 this index.
 
-.. note::
+> **Note**
+>
+> In sharded clusters, if you do *not* use
+> the `_id` field as the shard key, then your application
+> **must** ensure the uniqueness of the values in the `_id` field.
+> You can do this by using a field with an auto-generated ObjectId.
 
-   In :term:`sharded clusters <sharded cluster>`, if you do *not* use
-   the ``_id`` field as the :term:`shard key`, then your application
-   **must** ensure the uniqueness of the values in the ``_id`` field.
-   You can do this by using a field with an auto-generated :term:`ObjectId`.
-
-.. _index-names:
-
-Index Names
-~~~~~~~~~~~
+### Index Names
 
 The default name for an index is the concatenation of the indexed keys
-and each key's direction in the index (``1`` or ``-1``) using underscores
-as a separator. For example, an index created on ``{ item : 1, quantity:
--1 }`` has the name ``item_1_quantity_-1``.
+and each key's direction in the index (`1` or `-1`) using underscores
+as a separator. For example, an index created on `{ item : 1, quantity: -1 }` has the name `item_1_quantity_-1`.
 
-You cannot rename an index once created. Instead, you must 
-:ref:`drop <drop-an-index>` and recreate the index with a new name.
+You cannot rename an index once created. Instead, you must
+drop and recreate the index with a new name.
 
-To learn how to specify the name for an index, see :ref:`specify-index-name`.
+To learn how to specify the name for an index, see specify-index-name.
 
-Index Build Performance
-~~~~~~~~~~~~~~~~~~~~~~~
+### Index Build Performance
 
 Applications may encounter reduced performance during index builds,
 including limited read/write access to the collection. For more
-information on the index build process, see :ref:`index-operations`,
-including the :ref:`index-operations-replicated-build` section.
+information on the index build process, see index-operations,
+including the index-operations-replicated-build section.
 
-Learn More
-----------
+## Learn More
 
 - MongoDB provides a number of different index types to support specific
-  types of data and queries. To learn more, see :ref:`index-types`.
-
+  types of data and queries. To learn more, see index-types.
 - To learn what properties and behaviors you can specify in your index,
-  see :ref:`index-properties`.
-
+  see index-properties.
 - To understand considerations you may need to make when you create an
-  index, see :ref:`manual-indexing-strategies`.
-
+  index, see manual-indexing-strategies.
 - To learn about the performance impact of indexes, see
-  :ref:`Operational Factors and Data Models <data-model-indexes>`.
-
+  Operational Factors and Data Models.
 - To learn about query settings and indexes, see
-  :dbcommand:`setQuerySettings`.
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Create </core/indexes/create-index>
-   Drop </core/indexes/drop-index>
-   Types </core/indexes/index-types>
-   Properties </core/indexes/index-properties>
-   Builds </core/index-creation>
-   Manage </tutorial/manage-indexes>
-   Measure Use </tutorial/measure-index-use>
-   Strategies </applications/indexes>
-   Reference </reference/indexes>
+  `setQuerySettings`.

@@ -1,60 +1,27 @@
-.. start-include-here
-
-.. _server-release-notes-landing:
-
-Release Notes
--------------
-
-.. meta::
-   :description: Explore release notes for current and previous stable MongoDB versions, including EOL releases.
-
-.. include:: /includes/in-dev.rst
+# Release Notes
 
 Always install the latest, stable version of MongoDB. For more
 information on types of MongoDB releases, see
-:ref:`release-version-numbers`.
+release-version-numbers.
 
 To see changes in MongoDB releases, see the following release notes.
 
-Current Stable Release
-~~~~~~~~~~~~~~~~~~~~~~
+## Current Stable Release
 
 (*8.2-series*)
 
-- :ref:`release-notes-8.2`
+- release-notes-8.2
 
-Previous Stable Releases
-~~~~~~~~~~~~~~~~~~~~~~~~
+## Previous Stable Releases
 
-- :ref:`release-notes-8.0`
-- :ref:`release-notes-7.0`
+- release-notes-8.0
+- release-notes-7.0
 
-EOL Releases
-~~~~~~~~~~~~
+## EOL Releases
 
-For documentation associated with an EOL release, see 
-`the legacy documentation <https://www.mongodb.com/docs/legacy/>`__.
+For documentation associated with an EOL release, see
+[the legacy documentation](https://www.mongodb.com/docs/legacy/).
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
+## Additional Information
 
-   8.3 (Upcoming) </release-notes/8.3>
-   8.2 (Stable Release) </release-notes/8.2>
-   8.0 </release-notes/8.0>
-   7.0 </release-notes/7.0>
-
-.. end-include-here
-
-.. this page is primarily accessible via the /reference
-
-Additional Information
-~~~~~~~~~~~~~~~~~~~~~~
-
-See also: :doc:`/reference/versioning`
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   Versioning </reference/versioning>
+See also: /reference/versioning

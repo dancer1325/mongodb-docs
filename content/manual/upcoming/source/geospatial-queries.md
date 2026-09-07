@@ -1,487 +1,343 @@
-.. _geospatial-queries:
-
-==================
-Geospatial Queries
-==================
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: programming_language
-   :values: shell
-     
-.. facet::
-   :name: genre
-   :values: reference
-
-.. meta:: 
-   :description: How to query geospatial data such as geoJSON objects and legacy coordinate pairs.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
+# Geospatial Queries
 
 MongoDB supports query operations on geospatial data. This section
 introduces MongoDB's geospatial features.
 
-.. _geo-overview-location-data:
+## Geospatial Data
 
-Geospatial Data
----------------
+In MongoDB, you can store geospatial data as GeoJSON objects or as legacy coordinate pairs.
 
-In MongoDB, you can store geospatial data as :ref:`GeoJSON
-<geospatial-geojson>` objects or as :ref:`legacy coordinate pairs
-<geospatial-legacy>`.
-
-.. _geospatial-geojson:
-
-GeoJSON Objects
-~~~~~~~~~~~~~~~
+### GeoJSON Objects
 
 To calculate geometry over an Earth-like sphere, store your location
-data as :ref:`GeoJSON objects <geospatial-indexes-store-geojson>`.
+data as GeoJSON objects.
 
-.. include:: /includes/extracts/geojson-specification-geospatial.rst
-
-.. _geospatial-legacy:
-
-Legacy Coordinate Pairs
-~~~~~~~~~~~~~~~~~~~~~~~
+### Legacy Coordinate Pairs
 
 To calculate distances on a Euclidean plane, store your location data
-as legacy coordinate pairs and use a :ref:`geo-2d` index. MongoDB
+as legacy coordinate pairs and use a geo-2d index. MongoDB
 supports spherical surface calculations on legacy coordinate pairs by using
-a :ref:`geo-2dsphere` index if you manually convert the data to 
-the :ref:`GeoJSON Point type <geojson-point>`.
+a geo-2dsphere index if you manually convert the data to
+the GeoJSON Point type.
 
-.. include:: /includes/fact-legacy-coordinates-specification.rst
-
-.. _index-feature-geospatial:
-
-Geospatial Indexes
-------------------
+## Geospatial Indexes
 
 MongoDB provides the following geospatial index types to support
 geospatial queries. For more information on geospatial indexes, see
-:ref:`geospatial-index`.
+geospatial-index.
 
-.. _geo-2dsphere:
+### `2dsphere`
 
-``2dsphere``
-~~~~~~~~~~~~
+2dsphere indexes support queries that calculate
+geometries on an earth-like sphere.
 
-:ref:`2dsphere <2dsphere-index>` indexes support queries that calculate
-:ref:`geometries on an earth-like sphere <geospatial-geometry>`.
+For more information on the `2dsphere` index, see
+2dsphere-index.
 
-.. include:: /includes/create-2dsphere-index.rst
+### `2d`
 
-For more information on the ``2dsphere`` index, see
-:ref:`<2dsphere-index>`.
-
-.. _geo-2d:
-
-``2d``
-~~~~~~
-
-:ref:`2d <2d-index>` indexes support queries that calculate
-:ref:`geometries on a two-dimensional plane <geospatial-geometry>`.
-Although the index can support :query:`$nearSphere` queries that
-calculate on a sphere, if possible, use the :ref:`geo-2dsphere` index
+2d indexes support queries that calculate
+geometries on a two-dimensional plane.
+Although the index can support `\$nearSphere` queries that
+calculate on a sphere, if possible, use the geo-2dsphere index
 for spherical queries.
 
-.. include:: /includes/create-2d-index.rst
+For more information on the `2d` index, see 2d-index.
 
-For more information on the ``2d`` index, see :ref:`<2d-index>`.
+## Geospatial Queries
 
-Geospatial Queries
-------------------
+> **Note**
+>
 
-.. note::
-
-   .. include::  /includes/extracts/geospatial-queries-longitude-values.rst
-
-.. _geospatial-operators:
-
-Geospatial Query Operators
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Geospatial Query Operators
 
 MongoDB provides the following geospatial query operators. For more details, including examples, see the respective reference pages.
 
-.. list-table::
-   :widths: 30,70
-   :header-rows: 1
+- - Name
+  - Description
+- - `\$geoIntersects`
+  - Selects geometries that intersect with a GeoJSON geometry.
+    The `2dsphere` index supports `\$geoIntersects`.
+- - `\$geoWithin`
+  - Selects geometries within a bounding GeoJSON geometry. The `2dsphere` and
+    `2d` indexes support `\$geoWithin`.
+- - `\$near`
+  - Returns geospatial objects in proximity to a point.
+    Requires a geospatial index. The `2dsphere` and `2d` indexes
+    support `\$near`.
+- - `\$nearSphere`
+  - Returns geospatial objects in proximity to a point on a sphere.
+    Requires a geospatial index. The `2dsphere` and `2d` indexes
+    support `\$nearSphere`.
 
-   * - Name
+> **Note**
+>
 
-     - Description
+### Geospatial Aggregation Stage
 
-   * - :query:`$geoIntersects`
+MongoDB provides the following geospatial aggregation pipeline stage:
 
-     - Selects geometries that intersect with a :term:`GeoJSON` geometry.
-       The ``2dsphere`` index supports :query:`$geoIntersects`.
-   
+- - Stage
+  - Description
+- - `\$geoNear`
+  - 
 
-   * - :query:`$geoWithin`
-
-     - Selects geometries within a bounding :ref:`GeoJSON geometry
-       <geospatial-indexes-store-geojson>`. The ``2dsphere`` and 
-       ``2d`` indexes support :query:`$geoWithin`.
-   
-
-   * - :query:`$near`
-
-     - Returns geospatial objects in proximity to a point.
-       Requires a geospatial index.  The ``2dsphere`` and ``2d`` indexes 
-       support :query:`$near`.
-   
-
-   * - :query:`$nearSphere`
-
-     - Returns geospatial objects in proximity to a point on a sphere.
-       Requires a geospatial index.  The ``2dsphere`` and ``2d`` indexes 
-       support :query:`$nearSphere`.
-   
-.. note::
-
-   .. include:: /includes/time-series/fact-time-series-geodata.rst
-
-.. _geospatial-aggregation:
-
-Geospatial Aggregation Stage
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-MongoDB provides the following geospatial :ref:`aggregation pipeline
-stage <aggregation-pipeline>`:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 38 72
-
-   * - Stage
-
-     - Description
-
-   * - :pipeline:`$geoNear`
-
-     - .. include:: /includes/extracts/geoNear-stage-toc-description.rst
-
-       .. include:: /includes/extracts/geoNear-stage-index-requirement.rst
-
-For more details, including examples, see :pipeline:`$geoNear`
+For more details, including examples, see `\$geoNear`
 reference page.
 
-.. _geospatial-geometry:
-
-Geospatial Models
------------------
+## Geospatial Models
 
 MongoDB geospatial queries can interpret geometry on a flat surface or
 a sphere.
 
-``2dsphere`` indexes support only spherical queries (i.e. queries that
+`2dsphere` indexes support only spherical queries (i.e. queries that
 interpret geometries on a spherical surface).
 
-``2d`` indexes support flat queries (i.e. queries that interpret
-geometries on a flat surface) and some spherical queries. While ``2d``
-indexes support some spherical queries, the use of ``2d`` indexes for
+`2d` indexes support flat queries (i.e. queries that interpret
+geometries on a flat surface) and some spherical queries. While `2d`
+indexes support some spherical queries, the use of `2d` indexes for
 these spherical queries can result in error. If possible, use
-``2dsphere`` indexes for spherical queries.
+`2dsphere` indexes for spherical queries.
 
 The following table lists the geospatial query operators, supported
 query, used by each geospatial operations:
 
-.. list-table::
-   :header-rows: 1
-   :widths: 48, 12, 40
+- - Operation
+  - Spherical/Flat Query
+  - Notes
 
-   * - Operation
+- - `\$near` (GeoJSON centroid
+    point in this line and the following line, 2dsphere index)
+  - Spherical
+  - See also the `\$nearSphere` operator, which provides the
+    same functionality when used with GeoJSON and a 2dsphere index.
 
-     - Spherical/Flat Query
+- - `\$near` (legacy coordinates, 2d index)
+  - Flat
+  - 
 
-     - Notes
+- - `\$nearSphere` (GeoJSON point, 2dsphere index)
 
-   * - :query:`$near` (:ref:`GeoJSON <geospatial-geojson>` centroid
-       point in this line and the following line, :ref:`2dsphere
-       <geo-2dsphere>` index)
+  - Spherical
 
-     - Spherical
+  - Provides the same functionality as `\$near` operation that
+    uses GeoJSON point and a
+    2dsphere index.
 
-     - See also the :query:`$nearSphere` operator, which provides the
-       same functionality when used with :ref:`GeoJSON
-       <geospatial-geojson>` and a :ref:`2dsphere <geo-2dsphere>` index.
+    For spherical queries, it may be preferable to use
+    `\$nearSphere` which explicitly specifies the spherical
+    queries in the name rather than `\$near` operator.
 
-   * - :query:`$near` (:ref:`legacy coordinates <geospatial-legacy>`, :ref:`2d <geo-2d>` index)
+- - `\$nearSphere` (legacy coordinates, 2d index)
+  - Spherical
+  - Use GeoJSON points instead.
 
-     - Flat
+- - `\$geoWithin` : { \`\$geometry\`: ... }
+  - Spherical
+  - 
 
-     -
+- - `\$geoWithin` : { \`\$box\`: ... }
+  - Flat
+  - 
 
-   * - :query:`$nearSphere` (:ref:`GeoJSON <geospatial-geojson>` point, :ref:`2dsphere <geo-2dsphere>` index)
+- - `\$geoWithin` : { \`\$polygon\`: ... }
+  - Flat
+  - 
 
-     - Spherical
+- - `\$geoWithin` : { \`\$center\`: ... }
+  - Flat
+  - 
 
-     - Provides the same functionality as :query:`$near` operation that
-       uses :ref:`GeoJSON <geospatial-geojson>` point and a
-       :ref:`2dsphere <geo-2dsphere>` index.
+- - `\$geoWithin` : { \`\$centerSphere\`: ... }
+  - Spherical
+  - 
 
-       For spherical queries, it may be preferable to use
-       :query:`$nearSphere` which explicitly specifies the spherical
-       queries in the name rather than :query:`$near` operator.
+- - `\$geoIntersects`
+  - Spherical
+  - 
 
-   * - :query:`$nearSphere` (:ref:`legacy coordinates <geospatial-legacy>`, :ref:`2d <geo-2d>` index)
+- - `\$geoNear` aggregation stage (2dsphere index)
+  - Spherical
+  - 
 
-     - Spherical
+- - `\$geoNear` aggregation stage (2d index)
+  - Flat
+  - 
 
-     - Use :term:`GeoJSON` points instead.
+## Perform Geospatial Queries in Atlas
 
-   * - :query:`$geoWithin` : { :query:`$geometry`: ... }
+You can use the {+atlas+} UI
+to perform geospatial queries in Atlas.
 
-     - Spherical
+**Create an index**
 
-     -
+If your geospatial collection does not already have a geospatial
+index, you must create one.
 
-   * - :query:`$geoWithin` : { :query:`$box`: ... }
+1.  Select the database for the collection.
 
-     - Flat
+    The main panel and Namespaces on the left side
+    list the collections in the database.
 
-     -
+2.  Select the collection.
 
-   * - :query:`$geoWithin` : { :query:`$polygon`: ... }
+    Select the collection that contains your geospatial data on
+    the left-hand side or in the main panel. The main panel displays
+    the Find, Indexes, and
+    Aggregation views.
 
-     - Flat
+3.  Select the Index view.
 
-     -
+    When you open the Index view, Atlas
+    displays any indexes that exist on the collection.
 
-   * - :query:`$geoWithin` : { :query:`$center`: ... }
+4.  Define the Index for the geo Type
 
-     - Flat
+    Press the Create Index button.
 
-     -
+    Define a geo Type index. Refer to
+    How to Index GeoJSON Objects.
 
-   * - :query:`$geoWithin` : { :query:`$centerSphere`: ... }
+**Query the geospatial data**
 
-     - Spherical
+1.  Select the Find view.
 
-     -
+    From the collection that contains your geospatial
+    data, select the Find tab to view your geospatial
+    collection.
 
-   * - :query:`$geoIntersects`
+2.  Enter a query.
 
-     - Spherical
+    Enter a query in the Filter text box. Use
+    any of the geospatial query operators to perform the relevant query
+    on your geospatial data. A geospatial query might resemble:
 
-     -
+```javascript
+{ 
+  "coordinates": { 
+    $geoWithin: { 
+      $geometry: { 
+        type: "Polygon", 
+        coordinates: [ 
+          [ 
+            [-80.0, 10.00], [ -80.0, 9.00], [ -79.0, 9.0], [ -79.0, 10.00 ], [ -80.0, 10.0 ] 
+          ] 
+        ] 
+      } 
+    } 
+  } 
+}
 
+```
 
-   * - :pipeline:`$geoNear` aggregation stage (:ref:`2dsphere <geo-2dsphere>` index)
-     - Spherical
-     -
+#\. Press the Apply button.
 
-   * - :pipeline:`$geoNear` aggregation stage (:ref:`2d <geo-2d>` index)
-     - Flat
-     -
+> Press the Apply button to apply your query.
+> Atlas filters the geospatial data to show only documents
+> that match your geospatial query.
 
-.. _geospatial-queries-atlas:
+You can create and execute aggregation pipelines to perform geospatial
+queries in the {+atlas+} UI.
 
-Perform Geospatial Queries in Atlas
------------------------------------
+**Access the aggregation pipeline builder**
 
-.. tabs::
+1.  Select the database for the collection.
 
-   .. tab:: Query Filter Bar
-      :tabid: filter-bar
+    The main panel and Namespaces on the left side list the
+    collections in the database.
 
-      You can use the {+atlas+} UI
-      to perform geospatial queries in Atlas. 
+2.  Select the collection.
 
-      .. procedure::
-        :style: normal
+    Select the collection that contains your geospatial data on
+    the left-hand side or in the main panel. The main panel displays
+    the Find, Indexes, and
+    Aggregation views.
 
-        .. step:: Create an index
+3.  Select the Aggregation view.
 
-           If your geospatial collection does not already have a geospatial
-           index, you must create one.
+    When you first open the Aggregation view, Atlas
+    displays an empty aggregation pipeline.
 
-           1. Select the database for the collection.
+**Create your geospatial query aggregation pipeline**
 
-              The main panel and :guilabel:`Namespaces` on the left side 
-              list the collections in the database.
-          
-           #. Select the collection.
+1.  Select an aggregation stage.
 
-              Select the collection that contains your geospatial data on 
-              the left-hand side or in the main panel. The main panel displays 
-              the :guilabel:`Find`, :guilabel:`Indexes`, and 
-              :guilabel:`Aggregation` views.
+    Select an aggregation stage from the Select dropdown in
+    the bottom-left panel.
 
-           #. Select the Index view.
-                
-              When you open the :guilabel:`Index` view, Atlas
-              displays any indexes that exist on the collection.
+    The toggle to the right of the dropdown dictates whether the
+    stage is enabled.
 
-           #. Define the Index for the geo Type
+    Use the `\$geoNear` stage to perform geospatial
+    queries in your aggregation pipeline.
 
-              Press the :guilabel:`Create Index` button. 
+2.  Fill in your aggregation stage.
 
-              Define a geo Type index. Refer to 
-              :ref:`How to Index GeoJSON Objects <geospatial-index>`.
+    Fill in your stage with the appropriate values.
+    If Comment Mode is
+    enabled, the pipeline builder provides syntactic guidelines for
+    your selected stage.
 
-        .. step:: Query the geospatial data 
+    As you modify your stage, Atlas updates the preview documents on
+    the right based on the results of the current stage.
 
-           1. Select the Find view.
+    Your `\$geoNear` stage may resemble:
 
-              From the collection that contains your geospatial
-              data, select the :guilabel:`Find` tab to view your geospatial 
-              collection.
+```javascript
+{
+  near: { type: "Point", coordinates: [ -73.9667, 40.78 ] },
+  spherical: true,
+  query: { category: "Parks" },
+  distanceField: "calcDistance"
+}
 
-           #. Enter a query.
+```
 
-              Enter a query in the :guilabel:`Filter` text box. Use
-              any of the :ref:`geospatial query operators 
-              <geospatial-operators>` to perform the relevant query
-              on your geospatial data. A geospatial query might resemble:
+1.  Run other pipeline stages as needed.
 
-              .. code-block:: javascript
+    Add stages as needed to complete your aggregation pipeline.
+    You might add `\$out` or
+    `\$merge` to write the results to a
+    view or the current collection.
 
-                  { 
-                    "coordinates": { 
-                      $geoWithin: { 
-                        $geometry: { 
-                          type: "Polygon", 
-                          coordinates: [ 
-                            [ 
-                              [-80.0, 10.00], [ -80.0, 9.00], [ -79.0, 9.0], [ -79.0, 10.00 ], [ -80.0, 10.0 ] 
-                            ] 
-                          ] 
-                        } 
-                      } 
-                    } 
-                  }
+## Examples
 
-           #. Press the Apply button.
-
-              Press the :guilabel:`Apply` button to apply your query.
-              Atlas filters the geospatial data to show only documents
-              that match your geospatial query.
-
-   .. tab:: Aggregation
-      :tabid: aggregation
-
-      You can create and execute aggregation pipelines to perform geospatial
-      queries in the {+atlas+} UI.
-
-      .. procedure::
-        :style: normal
-
-        .. step:: Access the aggregation pipeline builder
-
-           1. Select the database for the collection.
-
-              The main panel and :guilabel:`Namespaces` on the left side list the
-              collections in the database.
-
-           #. Select the collection.
-
-              Select the collection that contains your geospatial data on 
-              the left-hand side or in the main panel. The main panel displays 
-              the :guilabel:`Find`, :guilabel:`Indexes`, and 
-              :guilabel:`Aggregation` views.
-
-           #. Select the Aggregation view.
-                
-              When you first open the :guilabel:`Aggregation` view, Atlas
-              displays an empty aggregation pipeline.
-
-        .. step:: Create your geospatial query aggregation pipeline
-
-           1. Select an aggregation stage.
-
-              Select an aggregation stage from the :guilabel:`Select` dropdown in
-              the bottom-left panel.
-
-              The toggle to the right of the dropdown dictates whether the
-              stage is enabled.
-
-              Use the :pipeline:`$geoNear` stage to perform geospatial
-              queries in your aggregation pipeline.
-
-           #. Fill in your aggregation stage.
-
-              Fill in your stage with the appropriate values. 
-              If :ref:`Comment Mode <atlas-ui-pipeline-builder-settings>` is 
-              enabled, the pipeline builder provides syntactic guidelines for 
-              your selected stage. 
-
-              As you modify your stage, Atlas updates the preview documents on
-              the right based on the results of the current stage.
-
-              Your :pipeline:`$geoNear` stage may resemble:
-
-              .. code-block:: javascript
-
-                  {
-                    near: { type: "Point", coordinates: [ -73.9667, 40.78 ] },
-                    spherical: true,
-                    query: { category: "Parks" },
-                    distanceField: "calcDistance"
-                  }
-
-           #. Run other pipeline stages as needed.
-
-              Add stages as needed to complete your aggregation pipeline. 
-              You might add :pipeline:`$out` or 
-              :pipeline:`$merge` to write the results to a 
-              view or the current collection.
-
-.. _geospatial-query-examples:
-
-Examples
---------
-
-.. include:: /includes/geospatial-places-data-setup.rst
-
-The ``places`` collection above has a ``2dsphere`` index.
-The following query uses the :query:`$near` operator to return
+The `places` collection above has a `2dsphere` index.
+The following query uses the `\$near` operator to return
 documents that are at least 1000 meters from and at most 5000 meters
 from the specified GeoJSON point, sorted in order from nearest to
 farthest:
 
-.. code-block:: javascript
-
-   db.places.find(
-      {
-        location:
-          { $near:
-             {
-               $geometry: { type: "Point",  coordinates: [ -73.9667, 40.78 ] },
-               $minDistance: 1000,
-               $maxDistance: 5000
-             }
+```javascript
+db.places.find(
+   {
+     location:
+       { $near:
+          {
+            $geometry: { type: "Point",  coordinates: [ -73.9667, 40.78 ] },
+            $minDistance: 1000,
+            $maxDistance: 5000
           }
-      }
-   )
+       }
+   }
+)
 
-The following operation uses the :pipeline:`$geoNear` aggregation
-operation to return documents that match the query filter ``{ category:
-"Parks" }``, sorted in order of nearest to farthest to the specified
+```
+
+The following operation uses the `\$geoNear` aggregation
+operation to return documents that match the query filter `{ category: "Parks" }`, sorted in order of nearest to farthest to the specified
 GeoJSON point:
 
-.. code-block:: javascript
-
-   db.places.aggregate( [
-      {
-         $geoNear: {
-            near: { type: "Point", coordinates: [ -73.9667, 40.78 ] },
-            spherical: true,
-            query: { category: "Parks" },
-            distanceField: "calcDistance"
-         }
+```javascript
+db.places.aggregate( [
+   {
+      $geoNear: {
+         near: { type: "Point", coordinates: [ -73.9667, 40.78 ] },
+         spherical: true,
+         query: { category: "Parks" },
+         distanceField: "calcDistance"
       }
-   ] )
+   }
+] )
 
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Find Restaurants </tutorial/geospatial-tutorial>
-   GeoJSON Objects </reference/geojson>
+```

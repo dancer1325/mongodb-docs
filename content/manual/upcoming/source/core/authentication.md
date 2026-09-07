@@ -1,179 +1,98 @@
-.. _authentication:
-
-==========================================
-Authentication on Self-Managed Deployments
-==========================================
-
-.. default-domain:: mongodb
-
-.. facet::
-   :name: genre 
-   :values: reference
-
-.. meta:: 
-   :description: Authentication mechanisms for locally and cloud-deployed MongoDB databases.
-   :keywords: on-prem
-                 
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 2 
-   :class: singlecol
-
-.. dismissible-skills-card::
-   :skill: Secure MongoDB Self-Managed: AuthN and AuthZ
-   :url: https://learn.mongodb.com/skills/?openTab=security
-
-.. include:: /includes/LDAP-deprecated.rst
+# Authentication on Self-Managed Deployments
 
 Authentication is the process of verifying the identity of a client.
-When access control (:ref:`authorization <authorization>`) is
+When access control (authorization) is
 enabled, MongoDB requires all clients to authenticate themselves in
 order to determine their access.
 
-Although authentication and :ref:`authorization <authorization>`
+Although authentication and authorization
 are closely connected, authentication is distinct from authorization:
 
-- **Authentication** verifies the identity of a :ref:`user <users>`.
+- **Authentication** verifies the identity of a user.
 - **Authorization** determines the verified user's access to resources
   and operations.
 
-.. |page-topic| replace:: :atlas:`configure authentication through the UI </atlas-ui-authentication/>`
-
-.. cta-banner::
-   :url: https://www.mongodb.com/docs/atlas/atlas-ui-authentication/
-   :icon: Cloud
-
-   .. include:: /includes/fact-atlas-compatible.rst
-
-Getting Started
----------------
+## Getting Started
 
 To get started using access control, follow these tutorials:
 
-- :ref:`enable-access-control`
-- :ref:`create-users`
-- :ref:`authentication-auth-as-user`
+- enable-access-control
+- create-users
+- authentication-auth-as-user
 
-.. _available-authentication-mechanisms:
-.. _security-authentication-mechanisms:
+## Authentication Mechanisms
 
-Authentication Mechanisms
--------------------------
+### SCRAM Authentication
 
-.. include:: /includes/fact-authentication-compat-table.rst
-
-.. _authentication-mechanism-default:
-
-SCRAM Authentication
-~~~~~~~~~~~~~~~~~~~~
-
-:doc:`Salted Challenge Response Authentication Mechanism (SCRAM)
-</core/security-scram>` is the default authentication mechanism for
+Salted Challenge Response Authentication Mechanism (SCRAM) is the default authentication mechanism for
 MongoDB.
 
 For more information on SCRAM and MongoDB, see:
 
-- :ref:`SCRAM Authentication <authentication-scram>`
-- :ref:`scram-client-authentication`
+- SCRAM Authentication
+- scram-client-authentication
 
-.. _authentication-mechanism-x509:
+### X.509 Certificate Authentication
 
-X.509 Certificate Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-MongoDB supports :doc:`X.509 certificate authentication
-</core/security-x.509>` for client authentication and internal
+MongoDB supports X.509 certificate authentication for client authentication and internal
 authentication of the members of replica sets and sharded clusters.
-X.509 certificate authentication requires a secure :doc:`TLS/SSL
-connection </tutorial/configure-ssl>`.
+X.509 certificate authentication requires a secure TLS/SSL connection.
 
 To use MongoDB with X.509, you must use valid certificates generated and
 signed by a certificate authority. The client X.509 certificates
-must meet the :ref:`client certificate requirements
-<client-x509-certificates-requirements>`.
+must meet the client certificate requirements.
 
 For more information on X.509 and MongoDB, see:
 
-- :ref:`X.509 Certificate Authentication <security-auth-x509>`
-- :ref:`x509-client-authentication`
+- X.509 Certificate Authentication
+- x509-client-authentication
 
-.. _security-auth-kerberos:
+### Kerberos Authentication
 
-Kerberos Authentication
-~~~~~~~~~~~~~~~~~~~~~~~
-
-`MongoDB Enterprise
-<http://www.mongodb.com/products/mongodb-enterprise-advanced>`_
-supports :ref:`Kerberos Authentication <security-kerberos>`. Kerberos is
+[MongoDB Enterprise](http://www.mongodb.com/products/mongodb-enterprise-advanced)
+supports Kerberos Authentication. Kerberos is
 an industry standard authentication protocol for large client/server
 systems that provides authentication using short-lived tokens that are
 called tickets.
 
 To use MongoDB with Kerberos, you must have a properly configured
-Kerberos deployment, configured :ref:`Kerberos service principals
-<kerberos-service-principal>` for MongoDB, and a :ref:`Kerberos user
-principal <kerberos-user-principal>` added to MongoDB.
+Kerberos deployment, configured Kerberos service principals for MongoDB, and a Kerberos user principal added to MongoDB.
 
 For more information on Kerberos and MongoDB, see:
 
-- :ref:`Kerberos Authentication <security-kerberos>`
-- :doc:`/tutorial/control-access-to-mongodb-with-kerberos-authentication`
-- :doc:`/tutorial/control-access-to-mongodb-windows-with-kerberos-authentication`
+- Kerberos Authentication
+- /tutorial/control-access-to-mongodb-with-kerberos-authentication
+- /tutorial/control-access-to-mongodb-windows-with-kerberos-authentication
 
-.. _security-auth-ldap:
+### LDAP Proxy Authentication
 
-LDAP Proxy Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-`MongoDB Enterprise
-<http://www.mongodb.com/products/mongodb-enterprise-advanced>`_
-and `MongoDB Atlas
-<https://www.mongodb.com/atlas/database>`__ support
-:ref:`LDAP Proxy Authentication <security-ldap>` proxy
+[MongoDB Enterprise](http://www.mongodb.com/products/mongodb-enterprise-advanced)
+and [MongoDB Atlas](https://www.mongodb.com/atlas/database) support
+LDAP Proxy Authentication proxy
 authentication through a Lightweight Directory Access Protocol (LDAP)
 service.
 
 For more information on Kerberos and MongoDB, see:
 
-- :ref:`LDAP Proxy Authentication <security-ldap>`
-- :doc:`/tutorial/configure-ldap-sasl-activedirectory`
-- :doc:`/tutorial/configure-ldap-sasl-openldap`
-- :doc:`/tutorial/authenticate-nativeldap-activedirectory`
+- LDAP Proxy Authentication
+- /tutorial/configure-ldap-sasl-activedirectory
+- /tutorial/configure-ldap-sasl-openldap
+- /tutorial/authenticate-nativeldap-activedirectory
 
 These mechanisms allow MongoDB to integrate into your
 existing authentication system.
 
-OpenID Connect Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. include:: /includes/fact-oidc-authentication.rst 
+### OpenID Connect Authentication
 
 For more information on OpenID Connect and MongoDB, see:
 
-- :ref:`OpenID Connect Authentication <authentication-oidc>`
+- OpenID Connect Authentication
+- Configure MongoDB with OpenID Connect
+- [OpenID Connect](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol)
 
-- :ref:`Configure MongoDB with OpenID Connect <configure-oidc>` 
-
-- `OpenID Connect <https://auth0.com/docs/authenticate/protocols/openid-connect-protocol>`_  
-
-
-Internal / Membership Authentication
-------------------------------------
+## Internal / Membership Authentication
 
 In addition to verifying the identity of a client, MongoDB can require
-members of replica sets and sharded clusters to :ref:`authenticate
-their membership <inter-process-auth>` to their respective
-replica set or sharded cluster. See :ref:`inter-process-auth`
+members of replica sets and sharded clusters to authenticate their membership to their respective
+replica set or sharded cluster. See inter-process-auth
 for more information.
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Kerberos </core/kerberos>
-   LDAP Proxy </core/security-ldap>
-   OIDC/OAuth 2.0 </core/oidc/security-oidc>
-   Internal </core/security-internal-authentication>
-   Localhost Exception </core/localhost-exception>
-   Users </core/security-users>

@@ -1,84 +1,50 @@
-.. _security-encryption-at-rest:
+# Encryption at Rest
 
-==================
-Encryption at Rest
-==================
+## Encrypted Storage Engine
 
-.. meta::
-   :description: Ensure compliance with security standards by using encryption at rest in MongoDB Enterprise, including key management and storage engine options.
-
-.. default-domain:: mongodb
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-.. dismissible-skills-card::
-   :skill: Networking Security: Self-Managed
-   :url: https://learn.mongodb.com/skills?openTab=security
-
-.. include:: /includes/encryption-at-rest-intro.rst
-
-.. _encrypted-storage-engine:
-
-Encrypted Storage Engine
-------------------------
-
-.. include:: /includes/fact-enterprise-only-admonition.rst
-
-.. important:: Available for the WiredTiger Storage Engine only.
+> **Important Available for the WiredTiger Storage Engine only.**
+>
 
 MongoDB Enterprise 3.2 introduces a native encryption option for the
 WiredTiger storage engine. This feature allows MongoDB to encrypt data
 files such that only parties with the decryption key can decode and
 read the data.
 
-Encryption Process
-~~~~~~~~~~~~~~~~~~
+### Encryption Process
 
-.. note:: 
-
-   .. include:: /includes/fact-aes.rst
+> **Note**
+>
 
 If encryption is enabled, the default encryption mode that MongoDB
-Enterprise uses is the ``AES256-CBC`` (or 256-bit Advanced Encryption
+Enterprise uses is the `AES256-CBC` (or 256-bit Advanced Encryption
 Standard in Cipher Block Chaining mode) via OpenSSL. AES-256 uses a
 symmetric key; i.e. the same key to encrypt and decrypt text. MongoDB
 Enterprise for Linux also supports authenticated encryption
-``AES256-GCM`` (or 256-bit Advanced Encryption Standard in
-Galois/Counter Mode). 
+`AES256-GCM` (or 256-bit Advanced Encryption Standard in
+Galois/Counter Mode).
 
-The Encrypted Storage Engine uses the certified cryptography provider 
+The Encrypted Storage Engine uses the certified cryptography provider
 of the underlying operating system to perform cryptographic operations.
-For example, a MongoDB installation on a Linux operating system 
-uses the OpenSSL ``libcrypto`` FIPS-140 module.
+For example, a MongoDB installation on a Linux operating system
+uses the OpenSSL `libcrypto` FIPS-140 module.
 
 To run MongoDB in a FIPS-compliant mode:
 
-#. Configure the operating system to run in FIPS-enforcing mode.
+1.  Configure the operating system to run in FIPS-enforcing mode.
+2.  Configure MongoDB to enable the `net.tls.FIPSMode` setting.
+3.  Restart the `mongod` or `mongos`.
+4.  Check the server log file to confirm that FIPS mode is enabled. If FIPS mode is enabled, the message `FIPS 140-2 mode activated` appears in the log file.
 
-#. Configure MongoDB to enable the :setting:`net.tls.FIPSMode` setting.
+For more information, see configure-mdb-for-fips.
 
-#. Restart the ``mongod`` or ``mongos``.
-
-#. Check the server log file to confirm that FIPS mode is enabled. If FIPS mode is enabled, the message ``FIPS 140-2 mode activated`` appears in the log file.
-
-For more information, see :ref:`configure-mdb-for-fips`.
-
-.. note:: AES256-GCM and Filesystem Backups
-
-   .. include:: /includes/fact-aes256-backups.rst
+> **Note AES256-GCM and Filesystem Backups**
+>
 
 The data encryption process includes:
 
 - Generating a master key.
-
 - Generating keys for each database.
-
 - Encrypting data with the database keys.
-
 - Encrypting the database keys with the master key.
 
 The encryption occurs transparently in the storage layer; i.e. all data
@@ -87,14 +53,13 @@ exists in an unencrypted state in memory and during transmission.
 
 To encrypt all of MongoDB's network traffic, you can use TLS/SSL
 (Transport Layer Security/Secure Sockets Layer). See
-:doc:`/tutorial/configure-ssl` and
-:doc:`/tutorial/configure-ssl-clients`.
+/tutorial/configure-ssl and
+/tutorial/configure-ssl-clients.
 
+### Key Management
 
-Key Management
-~~~~~~~~~~~~~~
-
-.. important:: Secure management of the encryption keys is critical.
+> **Important Secure management of the encryption keys is critical.**
+>
 
 The database keys are internal to the server and are only paged to disk
 in an encrypted format. MongoDB never pages the master key to disk
@@ -108,40 +73,33 @@ key management options:
 - Integration with a third party key management appliance via the Key
   Management Interoperability Protocol (KMIP). **Recommended**
 
-  .. note::
-
-     .. include:: /includes/fact-required-kmip-ops.rst
+> **Note**
+>
 
 - Local key management via a keyfile.
 
 To configure MongoDB for encryption and use one of the two key
 management options, see
-:doc:`/tutorial/configure-encryption`.
+/tutorial/configure-encryption.
 
-Encryption and Replication
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Encryption and Replication
 
 Encryption is not a part of replication:
 
 - Master keys and database keys are not replicated, and
-
 - Data is not natively encrypted over the wire.
 
 Although you could reuse the same key for the nodes, MongoDB recommends
 the use of individual keys for each node as well as the use of
 transport encryption.
 
-For details, see :ref:`rotate-encryption-keys`.
+For details, see rotate-encryption-keys.
 
-.. _security-encryption-at-rest-audit-log:
-
-Audit Log
-~~~~~~~~~
+### Audit Log
 
 Available in MongoDB Enterprise only.
 
-Use KMIP Server to Manage Keys for Encrypting the MongoDB Audit Log
-```````````````````````````````````````````````````````````````````
+#### Use KMIP Server to Manage Keys for Encrypting the MongoDB Audit Log
 
 Starting in MongoDB 6.0 Enterprise, you can securely manage the keys for
 encrypting the MongoDB audit log using an external Key Management
@@ -150,66 +108,50 @@ Interoperability Protocol (KMIP) server.
 KMIP simplifies the management of cryptographic keys and eliminates the
 use of non-standard key management processes.
 
-.. include:: /includes/reference/fact-kmip-version.rst
-
 To use a KMIP server with audit log encryption, configure these settings
 and parameters:
 
-- :setting:`auditLog.auditEncryptionKeyIdentifier` setting
-- :setting:`auditLog.compressionMode` setting
-- :parameter:`auditEncryptionHeaderMetadataFile` parameter
-- :parameter:`auditEncryptKeyWithKMIPGet` parameter
+- `auditLog.auditEncryptionKeyIdentifier` setting
+- `auditLog.compressionMode` setting
+- `auditEncryptionHeaderMetadataFile` parameter
+- `auditEncryptKeyWithKMIPGet` parameter
 
 For testing audit log encryption, you can also use the
-:setting:`auditLog.localAuditKeyFile` setting.
+`auditLog.localAuditKeyFile` setting.
 
 Starting in MongoDB 6.0, if you need to downgrade to an earlier MongoDB
 version, you must first disable audit log encryption by removing
-:setting:`auditLog.auditEncryptionKeyIdentifier` or
-:setting:`auditLog.localAuditKeyFile`. Existing encrypted audit logs
+`auditLog.auditEncryptionKeyIdentifier` or
+`auditLog.localAuditKeyFile`. Existing encrypted audit logs
 remain encrypted, and you can keep any procedures you have developed for
 storage and processing of encrypted logs.
 
-.. note::
+> **Note**
+>
+> For audit log encryption, the audit log destination must be a
+> file. syslog cannot be used as the destination.
 
-   For audit log encryption, the audit log destination must be a
-   file. :term:`syslog` cannot be used as the destination.
-
-Unencrypted Audit Log and Process Log
-`````````````````````````````````````
+#### Unencrypted Audit Log and Process Log
 
 This section applies if you are not using an external Key Management
 Interoperability Protocol (KMIP) server to manage keys for encrypting
 the audit log as shown in the previous section.
 
 The audit log file is not encrypted as a part of MongoDB's encrypted
-storage engine. A :binary:`~bin.mongod` running with :ref:`logging
-<monitoring-standard-loggging>` may output potentially sensitive
+storage engine. A `mongod` running with logging may output potentially sensitive
 information to log files as a part of normal operations, depending on
-the configured :ref:`log verbosity <log-messages-configure-verbosity>`.
+the configured log verbosity.
 
-Use the :setting:`security.redactClientLogData` setting to prevent
-potentially sensitive information from entering the ``mongod`` process
-log. Setting :setting:`~security.redactClientLogData` reduces detail in
+Use the `security.redactClientLogData` setting to prevent
+potentially sensitive information from entering the `mongod` process
+log. Setting `redactClientLogData` reduces detail in
 the log and may complicate log diagnostics.
 
-See the :ref:`log redaction <monitoring-log-redaction>` manual entry for
+See the log redaction manual entry for
 more information.
 
-.. _app-level-encryption:
+## Application Level Encryption
 
-Application Level Encryption
-----------------------------
-
-Starting in MongoDB 7.0, you can use :ref:`<qe-manual-feature-qe>` to
+Starting in MongoDB 7.0, you can use qe-manual-feature-qe to
 enable end-to-end encryption. For details on getting started, see
-the :ref:`<qe-quick-start>`.
-
-.. include:: /includes/partners-security.rst
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Configure </tutorial/configure-encryption>
-   Rotate Keys </tutorial/rotate-encryption-key>
+the qe-quick-start.

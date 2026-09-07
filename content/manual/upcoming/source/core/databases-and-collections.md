@@ -1,384 +1,234 @@
-.. _databases-and-collections:
+# Databases and Collections in MongoDB
 
-====================================
-Databases and Collections in MongoDB 
-====================================
+## Overview
 
-.. default-domain:: mongodb
+MongoDB stores data records as documents
+(specifically BSON documents) which are
+gathered together in collections. A
+database stores one or more collections of documents.
 
-.. facet::
-   :name: genre 
-   :values: reference
-
-.. facet::
-   :name: programming_language
-   :values: shell 
-
-.. meta:: 
-   :keywords: drivers, table, code example, compass
-   :description: Manage databases and collections in MongoDB using Atlas UI, `mongosh`, or Compass, with options for creation and schema validation.
-
-.. contents:: On this page
-   :local:
-   :backlinks: none
-   :depth: 1
-   :class: singlecol
-
-Overview 
---------
-
-MongoDB stores data records as :term:`documents <document>`
-(specifically :ref:`BSON documents <bson-document-format>`) which are
-gathered together in :term:`collections <collection>`.  A
-:term:`database <database>` stores one or more collections of documents.
-
-You can manage :atlas:`databases </atlas-ui/databases>` and
-:atlas:`collections </atlas-ui/collections>` on the Atlas cluster from 
-the Atlas UI, :binary:`~bin.mongosh`, or |compass|. This page describes
+You can manage databases and
+collections on the Atlas cluster from
+the Atlas UI, `mongosh`, or [\|compass\|](##SUBST##|compass|). This page describes
 how to manage databases and collections on the Atlas cluster from the
 Atlas UI. For self-managed deployments, you can use
-:binary:`~bin.mongosh` or |compass| to manage databases and collections. 
+`mongosh` or [\|compass\|](##SUBST##|compass|) to manage databases and collections.
 
 Select the client that you want to use to manage databases and
-collections.  
+collections.
 
-.. tabs:: 
-
-   .. tab:: Atlas UI
-      :tabid: atlas
-
-      MongoDB Atlas is a multi-cloud database service that simplifies
-      deploying and managing your databases on the cloud providers of
-      your choice. 
-
-   .. tab:: mongosh 
-      :tabid: mongosh 
-
-      The MongoDB Shell, :program:`mongosh`, is a JavaScript and Node.js 
-      :abbr:`REPL (Read Eval Print Loop)` environment for interacting
-      with MongoDB deployments. To learn more, see :mongosh:`mongosh
-      </>`. 
-
-   .. tab:: MongoDB Compass 
-      :tabid: compass 
-
-      MongoDB Compass is a powerful GUI for querying, aggregating, and
-      analyzing your MongoDB data in a visual environment. To learn
-      more, see :compass:`MongoDB Compass </>`.
-
+MongoDB Atlas is a multi-cloud database service that simplifies
+deploying and managing your databases on the cloud providers of
+your choice.
+The MongoDB Shell, `mongosh`, is a JavaScript and Node.js
+REPL (Read Eval Print Loop) environment for interacting
+with MongoDB deployments. To learn more, see `mongosh`.
+MongoDB Compass is a powerful GUI for querying, aggregating, and
+analyzing your MongoDB data in a visual environment. To learn
+more, see MongoDB Compass.
 Databases
 ---------
 
-In MongoDB, databases hold one or more collections of documents. 
+In MongoDB, databases hold one or more collections of documents.
 
-.. tabs:: 
-   :hidden:
+To select a database to use, log in to Atlas and do the following:
 
-   .. tab:: Atlas UI
-      :tabid: atlas
+**Navigate to the Collections tab.**
 
-      To select a database to use, log in to Atlas and do the following:
+**Select the database from the list of databases in the left pane.**
 
-      .. procedure:: 
-         :style: normal
+To select a database to use, in `mongosh`, issue the
+`use <db>` statement, as in the following example:
 
-         .. step:: Navigate to the :guilabel:`Collections` tab.
+```javascript
+use myDB
+```
 
-         .. step:: Select the database from the list of databases in the left pane.
+To select a database to use, complete the following steps:
 
-   .. tab:: mongosh 
-      :tabid: shell 
+**Start \|compass\| and connect to your cluster.**
 
-      To select a database to use, in :binary:`~bin.mongosh`, issue the
-      ``use <db>`` statement, as in the following example: 
+To learn more, see Connect to MongoDB.
 
-      .. code-block:: javascript
+**Select Databases from the left navigation.**
 
-         use myDB
-
-   .. tab:: MongoDB Compass 
-      :tabid: compass 
-
-      To select a database to use, complete the following steps:
-
-      .. procedure:: 
-         :style: normal 
-
-         .. step:: Start |compass| and connect to your cluster. 
-
-            To learn more, see :compass:`Connect to MongoDB
-            </connect/>`.
-            
-         .. step:: Select :guilabel:`Databases` from the left navigation. 
-
-            The :guilabel:`Databases` tab opens to list the existing databases
-            for your MongoDB deployment. 
-            
+The Databases tab opens to list the existing databases
+for your MongoDB deployment.
 Create a Database
-~~~~~~~~~~~~~~~~~
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~~
 
-.. tabs:: 
-   :hidden:
+To create a new database, log in to Atlas and do the following:
 
-   .. tab:: Atlas UI 
-      :tabid: atlas
+**Navigate to the Collections tab.**
 
-      To create a new database, log in to Atlas and do the following:
+**Click Create Database.**
 
-      .. procedure:: 
-         :style: normal
+**Enter the Database Name and the Collection Name.**
 
-         .. step:: Navigate to the :guilabel:`Collections` tab.
+Enter the database and the collection name to create the
+database and its first collection.
 
-         .. step:: Click :guilabel:`Create Database`.
+**Click Create.**
 
-         .. step:: Enter the :guilabel:`Database Name` and the :guilabel:`Collection Name`.
+Upon successful creation, the database and the collection
+displays in the left pane in the Atlas UI.
+If a database does not exist, MongoDB creates the database when you
+first store data for that database. As such, you can switch to a
+non-existent database and perform the following operation in
+\`mongosh\`:
 
-            Enter the database and the collection name to create the
-            database and its first collection. 
+```javascript
+use myNewDB
 
-         .. step:: Click :guilabel:`Create`.
+db.myNewCollection1.insertOne( { x: 1 } )
 
-            Upon successful creation, the database and the collection
-            displays in the left pane in the Atlas UI. 
+```
 
-   .. tab:: mongosh 
-      :tabid: mongosh 
+The `insertOne()` operation creates both the
+database `myNewDB` and the collection `myNewCollection1` if they do
+not already exist. Be sure that both the database and collection names
+follow MongoDB restrictions-on-db-names.
 
-      If a database does not exist, MongoDB creates the database when you
-      first store data for that database. As such, you can switch to a
-      non-existent database and perform the following operation in
-      :binary:`~bin.mongosh`:
+**Open the Databases tab.**
 
-      .. code-block:: javascript
+**Click the Create database button.**
 
-         use myNewDB
+**Enter database and first collection names in the Create Database dialog.**
 
-         db.myNewCollection1.insertOne( { x: 1 } )
+**Click Create Database to create the database and its first collection.**
 
-      The :method:`~db.collection.insertOne()` operation creates both the
-      database ``myNewDB`` and the collection ``myNewCollection1`` if they do
-      not already exist. Be sure that both the database and collection names
-      follow MongoDB :ref:`restrictions-on-db-names`.
-
-   .. tab:: MongoDB Compass 
-      :tabid: compass 
-
-      .. procedure:: 
-         :style: normal   
-
-         .. step:: Open the :guilabel:`Databases` tab.
-
-         .. step:: Click the :guilabel:`Create database` button.
-
-         .. step:: Enter database and first collection names in the :guilabel:`Create Database` dialog. 
-
-         .. step:: Click :guilabel:`Create Database` to create the database and its first collection. 
-
-.. _collections:
-
-Collections
------------
+## Collections
 
 MongoDB stores documents in collections. Collections are analogous to
 tables in relational databases.
 
-.. include:: /images/crud-annotated-collection.rst
-
-Create a Collection
-~~~~~~~~~~~~~~~~~~~
+### Create a Collection
 
 If a collection does not exist, MongoDB creates the collection when you
 first store data for that collection.
 
-.. tabs:: 
-   :hidden:
+To create a new collection, log in to Atlas and do the following:
 
-   .. tab:: Atlas 
-      :tabid: atlas
+**Navigate to the Collections tab.**
 
-      To create a new collection, log in to Atlas and do the following:
+**Click the + icon for the database.**
 
-      .. procedure:: 
-         :style: normal
+**Enter the name of the collection.**
 
-         .. step:: Navigate to the :guilabel:`Collections` tab.
+**Click Create.**
 
-         .. step:: Click the :guilabel:`+` icon for the database.
+Upon successful creation, the collection displays underneath
+the database in the Atlas UI.
 
-         .. step:: Enter the name of the collection.
+```javascript
+db.myNewCollection2.insertOne( { x: 1 } )
+db.myNewCollection3.createIndex( { y: 1 } )
 
-         .. step:: Click :guilabel:`Create`.
+```
 
-            Upon successful creation, the collection displays underneath
-            the database in the Atlas UI. 
+Both the `insertOne()` and the
+`createIndex()` operations create their
+respective collection if they do not already exist. Be sure that the
+collection name follows MongoDB restrictions-on-db-names.
 
-   .. tab:: mongosh 
-      :tabid: mongosh 
+**Click the name of the database where you to want to create a collection in the left navigation.**
 
-      .. code-block:: javascript
+**Click the + icon next to the database name.**
 
-         db.myNewCollection2.insertOne( { x: 1 } )
-         db.myNewCollection3.createIndex( { y: 1 } )
+**Enter the name of the collection in the Create Collection dialog.**
 
-      Both the :method:`~db.collection.insertOne()` and the
-      :method:`~db.collection.createIndex()` operations create their
-      respective collection if they do not already exist. Be sure that the
-      collection name follows MongoDB :ref:`restrictions-on-db-names`.
+**Click Create Collection to create the collection.**
 
-   .. tab:: MongoDB Compass 
-      :tabid: compass 
+### Explicit Creation
 
-      .. procedure:: 
-         :style: normal   
+To create a new collection, log in to Atlas and do the following:
 
-         .. step:: Click the name of the database where you to want to create a collection in the left navigation.
+**Navigate to the Collections tab.**
 
-         .. step:: Click the :guilabel:`+` icon next to the database name.
+**Click the + icon for the database.**
 
-         .. step:: Enter the name of the collection in the :guilabel:`Create Collection` dialog.
+**Enter the name of the collection.**
 
-         .. step:: Click :guilabel:`Create Collection` to create the collection. 
+**Optional. From the Additional Preferences dropdown, select the type of collection that you want to create.**
 
-Explicit Creation
-~~~~~~~~~~~~~~~~~
+You can create one of the following types of collections:
 
-.. tabs:: 
-   :hidden:
+- Capped collection
 
-   .. tab:: Atlas 
-      :tabid: atlas
+  If you select to create a capped collection, specify the
+  maximum size in bytes.
 
-      To create a new collection, log in to Atlas and do the following:
+- Time Series Collection
 
-      .. procedure:: 
-         :style: normal
+  If you select to create a time series collection, specify
+  the time field and granularity. You can optionally specify
+  the meta field and the time for old data in the collection
+  to expire.
 
-         .. step:: Navigate to the :guilabel:`Collections` tab.
+- Clustered Index Collection
 
-         .. step:: Click the :guilabel:`+` icon for the database.
+  If you select to create a clustered collection, you must
+  specify clustered index key value and a name for the
+  clustered index.
 
-         .. step:: Enter the name of the collection.
-         
-         .. step:: Optional. From the :guilabel:`Additional Preferences` dropdown, select the type of collection that you want to create.
+**Click Create.**
 
-            You can create one of the following types of collections:
-            
-            - :ref:`Capped collection <manual-capped-collection>`
+Upon successful creation, the collection displays underneath
+the database in the Atlas UI.
+MongoDB provides the `db.createCollection()` method to
+explicitly create a collection with various options, such as setting
+the maximum size or the documentation validation rules. If you are not
+specifying these options, you do not need to explicitly create the
+collection since MongoDB creates new collections when you first store
+data for the collections.
 
-              If you select to create a capped collection, specify the
-              maximum size in bytes. 
+To modify these collection options, see `collMod`.
 
-            - :ref:`Time Series Collection <manual-timeseries-landing>`
+**Click the name of the database where you to want to create a collection in the left navigation.**
 
-              If you select to create a time series collection, specify
-              the time field and granularity. You can optionally specify
-              the meta field and the time for old data in the collection
-              to expire.  
+**Click the Create collection button.**
 
-            - :ref:`Clustered Index Collection <clustered-collections>`
+**Enter the name of the collection and optionally, configure additional preferences.**
 
-              If you select to create a clustered collection, you must
-              specify clustered index key value and a name for the
-              clustered index.  
-         
-         .. step:: Click :guilabel:`Create`.
+**Click Create Collection to create the collection.**
 
-            Upon successful creation, the collection displays underneath
-            the database in the Atlas UI.          
+[\|compass\|](##SUBST##|compass|) provides the following additional preferences that
+you can configure for your collection:
 
-   .. tab:: mongosh 
-      :tabid: mongosh 
+- Create a Capped Collection
+- Create a Clustered Collection
+- Create a Collection with Collation
+- Create a Collection with Encrypted Field
 
-      MongoDB provides the :method:`db.createCollection()` method to
-      explicitly create a collection with various options, such as setting
-      the maximum size or the documentation validation rules. If you are not
-      specifying these options, you do not need to explicitly create the
-      collection since MongoDB creates new collections when you first store
-      data for the collections.
-
-      To modify these collection options, see :dbcommand:`collMod`.
-
-   .. tab:: MongoDB Compass 
-      :tabid: compass 
-
-      .. procedure:: 
-         :style: normal   
-
-         .. step:: Click the name of the database where you to want to create a collection in the left navigation.
-
-         .. step:: Click the :guilabel:`Create collection` button.
-
-         .. step:: Enter the name of the collection and optionally, configure additional preferences.
-
-         .. step:: Click :guilabel:`Create Collection` to create the collection. 
-
-            |compass| provides the following additional preferences that
-            you can configure for your collection: 
-
-            - :compass:`Create a Capped Collection</collections/capped-collection/>`
-            - :compass:`Create a Clustered Collection</collections/clustered-collection/>`
-            - :compass:`Create a Collection with Collation </collections/collation-collection/>`
-            - :compass:`Create a Collection with Encrypted Field </collections/encrypted-collection/>`
-            - :compass:`Create a Time Series Collection </collections/time-series-collection/>`
-
+\- Create a Time Series Collection
 Schema Validation
-~~~~~~~~~~~~~~~~~
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~~
 
 By default, a collection does not require its documents to have the
 same schema; i.e. the documents in a single collection do not need to
 have the same set of fields and the data type for a field can differ
 across documents within a collection.
 
-However, you can enforce :doc:`schema validation rules </core/schema-validation>` 
-for a collection during update and insert operations. 
-See :doc:`/core/schema-validation` for details.
+However, you can enforce schema validation rules
+for a collection during update and insert operations.
+See /core/schema-validation for details.
 
-For deployments hosted in {+atlas+}, the :atlas:`Performance Advisor 
-</performance-advisor>` and the {+atlas+} UI detect common schema
+For deployments hosted in {+atlas+}, the Performance Advisor and the {+atlas+} UI detect common schema
 design issues and suggest modifications that follow MongoDB best
-practices. To learn more, see :atlas:`Schema Suggestions 
-</performance-advisor/schema-suggestions/#schema-suggestions>`.
+practices. To learn more, see Schema Suggestions.
 
-Modifying Document Structure
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Modifying Document Structure
 
 To change the structure of the documents in a collection, such as add
 new fields, remove existing fields, or change the field values to a new
 type, update the documents to the new structure.
 
+### Unique Identifiers
 
-.. _collections-uuids:
-
-Unique Identifiers
-~~~~~~~~~~~~~~~~~~
-
-Collections are assigned an immutable :abbr:`UUID (Universally unique
-identifier)`. The
+Collections are assigned an immutable UUID (Universally unique identifier). The
 collection UUID remains the same across all members of a replica set
 and shards in a sharded cluster.
 
-.. tabs:: 
-   :hidden:
-
-   .. tab:: Atlas 
-      :tabid: atlas
-
-   .. tab:: mongosh 
-      :tabid: mongosh 
-
-      To retrieve the UUID for a collection, run either the
-      :manual:`listCollections </reference/command/listCollections>` command
-      or the :method:`db.getCollectionInfos()` method.
-
-   .. tab:: MongoDB Compass 
-      :tabid: compass
-
-.. toctree::
-   :titlesonly:
-   :hidden:
-
-   Views </core/views>
-   On-Demand Materialized Views </core/materialized-views>
-   Capped Collections </core/capped-collections>
-   Clustered Collections </core/clustered-collections>
+To retrieve the UUID for a collection, run either the
+listCollections command
+or the `db.getCollectionInfos()` method.
