@@ -37,59 +37,51 @@
 
 ## Key Features
 
-### High Performance
+### High Performance data persistence
 
-TODO: 
-MongoDB provides high performance data persistence. In particular,
-
-- Support for embedded data models reduces I/O activity on database
-  system.
-- Indexes support faster queries and can include keys from embedded
-  documents and arrays.
+* _Examples:_
+  * support -- for -- embedded data models
+    * Reason: 🧠reduces I/O activity | database system🧠
+  * indexes
+    * Reason:🧠enable
+      * faster queries
+      * keys -- from -- embedded documents & arrays🧠
 
 ### Query API
 
-The MongoDB Query API supports read and write operations (CRUD) as well as:
+* supports
+  * CRUD
+  * Data Aggregation
+  * Text Search
+  * Geospatial Queries
 
-- Data Aggregation
-- Text Search and Geospatial Queries.
+* [vs SQL](reference/sql-comparison.md)
+* [vs SQL aggregation](reference/sql-aggregation-comparison.md)
 
-> **See also**
->
-> - /reference/sql-comparison
->
-> \- /reference/sql-aggregation-comparison
+### High Availability / Replica set
 
-### High Availability
-
-MongoDB's replication facility, called replica set, provides:
-
-- *automatic* failover
-- data redundancy.
-
-A replica set is a group of
-MongoDB servers that maintain the same data set, providing redundancy
-and increasing data availability.
+* replica set
+  * == MongoDB servers /
+    * SAME data set
+    * provides
+      * *automatic* failover
+      * data redundancy
 
 ### Horizontal Scalability
 
-MongoDB provides horizontal scalability as part of its *core*
-functionality:
+* Sharding
+  * == distribute data | cluster of machines
+  * | MongoDB v3.4,
+    * you can create -- , based on the shard key, -- zones of data 
+      * == MongoDB directs reads & writes / covered by a zone -- to -- those shards | the zone
+  * [MORE](sharding.md)
 
-- Sharding distributes data across a
-  cluster of machines.
-- Starting in 3.4, MongoDB supports creating zones of data based on the shard key. In a
-  balanced cluster, MongoDB directs reads and writes covered by a zone
-  only to those shards inside the zone. See the zone-sharding
-  manual page for more information.
+### MULTIPLE Storage Engines
 
-### Support for Multiple Storage Engines
+* supported storage engines
+  * [wiredtiger](core/wiredtiger.md)
+  * [inmemory](core/inmemory.md)
 
-MongoDB supports multiple storage engines:
-
-- /core/wiredtiger (including support for
-  /core/security-encryption-at-rest)
-- /core/inmemory.
-
-In addition, MongoDB provides pluggable storage engine API that allows
-third parties to develop storage engines for MongoDB.
+* pluggable storage engine API
+  * enable
+    * third parties can develop storage engines -- for MongoDB

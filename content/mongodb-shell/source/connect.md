@@ -1,0 +1,420 @@
+# Connect to a Deployment
+
+This page shows how to use the MongoDB Shell to connect to a MongoDB
+deployment. You can connect to a
+[MongoDB Atlas cloud-hosted deployment](https://www.mongodb.com/docs/atlas),
+connect to a local deployment, or connect to another remote host with
+MongoDB Shell.
+
+## Prerequisites
+
+### Install `mongosh`
+
+These procedures assume you have already installed `mongosh`. For more
+information about installing `mongosh`, refer to
+mdb-shell-install.
+
+## Connect to a MongoDB Atlas Deployment
+
+You can connect to your MongoDB Atlas deployment directly from your shell.
+
+**Get your Atlas Connection String**
+
+You need an Atlas connection string to connect from MongoDB Shell.
+You can get the Atlas connection string in the Atlas UI.
+
+Refer to the
+[Find Your MongoDB Atlas Connection String](https://www.mongodb.com/docs/manual/reference/connection-string/#find-your-mongodb-atlas-connection-string)
+guide for details.
+
+**Set Your Database Credentials**
+
+If you haven't already
+[created a database user](https://www.mongodb.com/docs/atlas/tutorial/create-mongodb-user-for-cluster/),
+you must set a username and password. To connect to Atlas, pass your username with
+the Atlas connection string. After you issue the connect command, the
+shell prompts for your password.
+
+**Connect to MongoDB Atlas with \`\`mongosh\`\`**
+
+To establish your connection, run the `mongosh` command with your
+connection string and options to establish the connection.
+
+The connection string includes the following elements:
+
+- Your cluster name
+- A hash
+- A flag for the API version
+- A flag for the username you want to use to connect
+
+It resembles the following string:
+
+```sh
+mongosh "mongodb+srv://YOUR_CLUSTER_NAME.YOUR_HASH.mongodb.net/" --apiVersion YOUR_API_VERSION --username YOUR_USERNAME
+```
+
+> **Note Learn More**
+>
+> You can use other connection security options to connect to Atlas via
+> `mongosh`. For information on connecting with a private
+> IP for peering or a Private Endpoint connection, refer to the
+> [Atlas Connect via mongosh](https://www.mongodb.com/docs/atlas/mongo-shell-connection/#choose-your-connection-security)
+> documentation.
+
+## Connect to a Local Deployment on the Default Port
+
+To connect to a MongoDB deployment running on **localhost** with
+**default port** 27017, run `mongosh` without any options:
+
+```sh
+mongosh
+
+```
+
+This is equivalent to the following command:
+
+```sh
+mongosh "mongodb://localhost:27017"
+
+```
+
+## Connect to a Local Deployment on a Non-Default Port
+
+To specify a port to connect to on localhost, you can use either:
+
+- A \[connection string\](<https://www.mongodb.com/docs/manual/reference/connection-string/>) with the
+  chosen port
+- The `--port` command-line option
+
+For example, the following commands connect to a deployment running on
+localhost port 28015:
+
+```sh
+mongosh "mongodb://localhost:28015"
+
+```
+
+```sh
+mongosh --port 28015
+
+```
+
+## Connect to a Deployment on a Remote Host
+
+To specify a remote host and port, you can use either:
+
+- A \[connection string\](<https://www.mongodb.com/docs/manual/reference/connection-string/>) with the
+  chosen host and port.
+- The `--host` and `--port` command-line options. If you omit the
+  `--port` option, `mongosh` uses the default port 27017.
+
+For example, the following commands connect to a MongoDB deployment
+running on host `mongodb0.example.com` and port 28015:
+
+```sh
+mongosh "mongodb://mongodb0.example.com:28015"
+
+```
+
+```sh
+mongosh --host mongodb0.example.com --port 28015
+
+```
+
+> **Note Connect to MongoDB Atlas**
+>
+> If your remote host is an Atlas cluster, you can copy your
+> connection string from the Atlas UI. To learn more, see
+> \[Connect to a Cluster\](<https://www.mongodb.com/docs/atlas/connect-to-cluster/#use-the-connect-dialog-to-connect-to-your-cluster/>)
+> in the Atlas documentation.
+
+## Specify Connection Options
+
+Specify different connection options to connect to different types of
+deployments.
+
+### Connect With Authentication
+
+To connect to a MongoDB deployment that requires authentication, use the
+`--username` and `--authenticationDatabase` options. `mongosh` prompts you for a
+password, which it hides as you type.
+
+For example, to authenticate as user `alice` on the `admin`
+database, run the following command:
+
+```sh
+mongosh "mongodb://mongodb0.example.com:28015" --username alice --authenticationDatabase admin
+
+```
+
+To provide a password as part of the connection command instead of using
+the prompt, use the `--password` option. Use this
+option for programmatic usage of `mongosh`, like a `driver`.
+
+> **See also**
+>
+> - To enforce authentication on a deployment, see
+>   \[Enable Access Control\](<https://www.mongodb.com/docs/manual/tutorial/enable-authentication/>).
+>
+> \- To provision access to a MongoDB deployment, see \[Database Users\](<https://www.mongodb.com/docs/manual/core/security-users/>).
+
+### Connect with OpenID Connect
+
+To connect to a deployment using \[OpenID Connect\](<https://www.mongodb.com/docs/manual/core/security-oidc/>),
+use the `--authenticationMechanism` option and set it to `MONGODB-OIDC`.
+`mongosh` redirects you to a browser where you enter your identity provider's
+log-in information.
+
+> **Note**
+>
+> By default, `mongosh` requests the `oidc` and `offline_access`
+> scopes from the identity provider (IdP). If the IdP supports neither
+> `oidc` nor `offline_access`, `mongosh` does not request
+> those scopes. If the IdP supports `oidc` but not `offline_access`,
+> you must re-authenticate frequently. To learn more, see
+> oidcidentityproviders-fields.
+
+For example, the following connects to a local deployment using `MONGODB-OIDC`:
+
+```sh
+mongosh "mongodb://localhost/" --authenticationMechanism MONGODB-OIDC 
+
+```
+
+### Connect with LDAP
+
+To connect to a deployment using LDAP:
+
+- Set `--username` to a username that
+  respects the `security.ldap.authz.queryTemplate`, or any
+  configured `security.ldap.userToDNMapping` template.
+- Set `--password` to the appropriate
+  password. If you do not specify the password to the
+  `--password` command-line option, `mongosh` prompts you for
+  the password.
+- Set `--authenticationDatabase`
+  to `$external`.
+  The `$external` argument must be placed in single quotes, not
+  double quotes, to prevent the shell from interpreting `$external`
+  as a variable.
+- Set `--authenticationMechanism`
+  to `PLAIN`.
+
+> **Warning**
+>
+> When you use one-time passwords with LDAP authentication, adding
+> the connection string options
+> `maxPoolSize=1&srvMaxHosts=1` to your connection string is
+> recommended to reduce the potential for connection failures.
+
+Include the `--host` and
+`--port` of the MongoDB deployment, along with
+any other options relevant to your deployment.
+
+For example, the following operation authenticates to a MongoDB
+deployment running with LDAP authentication and authorization:
+
+```bash
+mongosh --username alice@dba.example.com --password  --authenticationDatabase '$external' --authenticationMechanism "PLAIN"  --host "mongodb.example.com" --port 27017
+
+```
+
+### Connect to a Replica Set
+
+To connect to a replica set, you can either:
+
+- Use the \[DNS Seedlist Connection Format\](<https://www.mongodb.com/docs/manual/reference/connection-string/#dns-seedlist-connection-format/>).
+- Explicitly specify the replica set name and members in the connection
+  string.
+
+> **Important**
+>
+> When a replica set runs in Docker, it might expose only one
+> MongoDB endpoint. In this case, the replica set is not discoverable, and specifying
+> `directConnection=false` can prevent your application from connecting to it.
+>
+> In a test or development environment, you can connect to the replica set by specifying
+> `directConnection=true` in your connection URI. In a production environment, we
+> recommend configuring the cluster to make each MongoDB instance accessible outside of
+> the Docker virtual network.
+
+#### Option 1: DNS Seedlist Format
+
+To use the DNS seedlist connection format, include the `+srv` modifier
+in your connection string.
+
+For example, to connect to a replica set on `server.example.com`, run
+the following command:
+
+```sh
+mongosh "mongodb+srv://server.example.com/"
+
+```
+
+> **Note +srv TLS Behavior**
+>
+> When you use the `+srv` connection string modifier, MongoDB
+> automatically sets the `--tls` connection option to
+> `true`. To override this behavior, set `--tls` to `false`.
+
+#### Option 2: Specify Members in Connection String
+
+You can specify individual replica set members in the
+\[connection string\](<https://www.mongodb.com/docs/manual/reference/connection-string/>).
+
+For example, to connect to a three-member replica set named `replA`,
+run the following command:
+
+```sh
+mongosh "mongodb://mongodb0.example.com.local:27017,mongodb1.example.com.local:27017,mongodb2.example.com.local:27017/?replicaSet=replA"
+
+```
+
+> **Note directConnection Parameter Added Automatically**
+>
+> When you specify individual replica set members in the connection
+> string, `mongosh` automatically adds the `directConnection=true`
+> parameter, unless at least one of the following is true:
+>
+> - The `replicaSet` query parameter is present in the connection string.
+> - The connection string uses the `mongodb+srv://` connection string
+>   format.
+> - The connection string contains a seed list with multiple hosts.
+> - The connection string already contains a `directConnection`
+>   parameter.
+>
+> When `directConnection=true`, the host specified in the connection URI
+> runs all operations and `mongosh` ignores all read preferences,
+> including explicitly set preferences.
+
+### Connect Using TLS
+
+To connect to a deployment using TLS, you can either:
+
+- Use the \[DNS Seedlist Connection Format\](<https://www.mongodb.com/docs/manual/reference/connection-string/#dns-seedlist-connection-format/>). The
+  `+srv` connection string modifier automatically sets the `tls`
+  option to `true` for the connection.
+
+  For example, to connect to a DNS seedlist-defined replica set with
+  `tls` enabled, run the following command:
+
+```sh
+mongosh "mongodb+srv://server.example.com/"
+
+```
+
+- Set the `--tls` option to `true` in the connection
+  string.
+
+  For example, to enable `tls` with a connection string option, run
+  the following command:
+
+```sh
+mongosh "mongodb://mongodb0.example.com:28015/?tls=true"
+
+```
+
+- Specify the `--tls` command-line option.
+
+  For example, to connect to a remote host with `tls` enabled, run the
+  following command:
+
+```sh
+mongosh "mongodb://mongodb0.example.com:28015" --tls
+
+```
+
+### Connect to a Specific Database
+
+To connect to a specific default database, specify a database in your
+\[connection string URI path\](<https://www.mongodb.com/docs/manual/reference/connection-string/>).
+If unspecified by the connection string, the default database
+is the `test` database.
+
+For example, to connect to a database called `qa` on localhost, run the
+following command:
+
+```sh
+mongosh "mongodb://localhost:27017/qa"
+
+```
+
+You can specify the authentication database in your connection string
+using the `authSource` connection option. If specified, the
+client uses this database to verify your user identity and credentials.
+If `authSource` is unspecified, it defaults to the default
+database specified in the connection string. If both `authSource`
+and the default database are unspecified,
+`authSource` defaults to the `admin` database.
+
+The following connection string sets the default database to `myDefaultDB`
+and the authentication database to `admin`:
+
+```bash
+mongodb://myDatabaseUser:D1fficultP%40ssw0rd@mongodb0.example.com:27017/myDefaultDB?authSource=admin
+
+```
+
+### Proxy Settings
+
+To establish a connection with proxy configurations, you can use the
+following environment variables:
+
+> **Note**
+>
+> `mongosh` supports the following proxy types:
+>
+> - Socks5 proxies
+> - HTTP proxies
+> - CONNECT proxies
+>
+> \- PAC (proxy auto-config) URLs that resolve to one of the previously  
+> listed proxies
+
+## Connect to a Different Deployment
+
+If you are already connected to a deployment in the MongoDB Shell, you can
+use the `Mongo()` or \[connect()\](<https://www.mongodb.com/docs/manual/reference/method/connect/>) method to connect to a different
+deployment from within the MongoDB Shell.
+
+To learn how to connect to a different deployment using these methods,
+see mdb-shell-open-new-connections-in-shell.
+
+## Verify Current Connection
+
+To verify your current database connection, use the
+`db.getMongo()` method.
+
+The method returns the \[connection string URI\](<https://www.mongodb.com/docs/manual/reference/connection-string/>) for your current connection.
+
+## Disconnect from a Deployment
+
+To disconnect from a deployment and exit `mongosh`, perform one of the
+following actions:
+
+- Type `.exit`, `exit`, or `exit()`.
+- Type `quit` or `quit()`.
+- Press `Ctrl` + `D`.
+- Press `Ctrl` + `C` twice.
+
+## Non-genuine Deployments
+
+The shell displays a warning message when you connect to non-genuine
+MongoDB instances. Non-genuine instances may behave differently from the
+official MongoDB instances due to missing, inconsistent, or incomplete
+features.
+
+## Limitations
+
+- \[Kerberos authentication\](<https://www.mongodb.com/docs/manual/core/kerberos/>) does not allow
+  `authMechanismProperties=CANONICALIZE_HOST_NAME:true|false` in the
+  connection string. Instead, use either:
+  - `authMechanismProperties=CANONICALIZE_HOST_NAME:forward`
+  - `authMechanismProperties=CANONICALIZE_HOST_NAME:forwardAndReverse`
+  - `authMechanismProperties=CANONICALIZE_HOST_NAME:none`
+- `mongosh` currently only supports the `zlib`
+  \[compressor\](<https://www.mongodb.com/docs/manual/core/wiredtiger/#compression/>). The following
+  compressors are not supported:
+  - `zstd`
+  - `snappy`
+- Starting in `mongosh` 2.0.0:

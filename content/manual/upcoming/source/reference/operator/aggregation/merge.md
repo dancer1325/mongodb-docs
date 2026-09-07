@@ -11,7 +11,7 @@ Definition
 .. note::
 
    This page describes the :pipeline:`$merge` stage, which outputs the
-   aggregation pipeline results to a collection. For the
+   aggregation pipeline results to a collection. For theºº
    :expression:`$mergeObjects` operator, which merges documents into a
    single document, see :expression:`$mergeObjects`.
 

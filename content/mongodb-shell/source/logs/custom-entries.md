@@ -1,0 +1,119 @@
+# Write Custom Log Entries
+
+You can write custom log entries from your
+MongoDB Shell scripts. Custom log
+entries help with debugging, error handling, and alert you when the
+script performs specific functions.
+
+## About this Task
+
+MongoDB Shell supports the following methods for custom log entries:
+
+- `log.debug()`
+- `log.error()`
+- `log.fatal()`
+- `log.info()`
+- `log.warn()`
+
+## Steps
+
+**Create a script that writes a custom log entry**
+
+The following script inserts documents into the `movies`
+collection and writes a custom `info` log entry. If the script
+errors, it writes a custom `error` log entry instead.
+
+```javascript
+// connect-and-insert-with-log-entry.js
+         
+try {
+   db = connect( 'mongodb://localhost/myDatabase' );
+
+   db.movies.insertMany( [
+      {
+         title: 'Titanic',
+         year: 1997,
+         genres: [ 'Drama', 'Romance' ]
+      },
+      {
+         title: 'Spirited Away', 
+         year: 2001,
+         genres: [ 'Animation', 'Adventure', 'Family' ]
+      },
+      {
+         title: 'Casablanca',
+         genres: [ 'Drama', 'Romance', 'War' ]
+      }
+   ] )
+   log.info('InsertData: Inserted 3 movies');
+} catch (error) {
+   log.error('Insert failed', { error: error.message });
+}
+
+```
+
+Save the script as `connect-and-insert-with-log-entry.js`.
+
+**Run the script**
+
+To run the `connect-and-insert-with-log-entry.js` script, use
+`mongosh` to connect to your deployment and run the following
+command within MongoDB Shell:
+
+```javascript
+load("connect-and-insert-with-log-entry.js")
+
+```
+
+Alternatively, you can run the script programmatically by using
+the `--file` option when you start
+`mongosh`:
+
+```sh
+mongosh --file connect-and-insert-with-log-entry.js
+```
+
+## Results
+
+The custom log entry appears in the logs for your session:
+
+```javascript
+{"t":{"$date":"2025-02-25T18:04:01.690Z"},"s":"I","c":"MONGOSH-SCRIPTS","id":1000000054,"ctx":"custom-log","msg":"InsertData: Inserted 3 movies"}
+
+```
+
+For more information about log sessions and how to retrieve log
+messages, see mdb-shell-view-logs.
+
+To verify that the script inserted the documents, query the `movies`
+collection:
+
+```javascript
+use myDatabase
+db.movies.find()
+
+```
+
+Output:
+
+```javascript
+[
+   {
+      _id: ObjectId('67bde8c2a527c6b1341979f2'),
+      title: 'Titanic',
+      year: 1997,
+      genres: [ 'Drama', 'Romance' ]
+   },
+   {
+      _id: ObjectId('67bde8c2a527c6b1341979f3'),
+      title: 'Spirited Away',
+      year: 2001,
+      genres: [ 'Animation', 'Adventure', 'Family' ]
+   },
+   {
+      _id: ObjectId('67bde8c2a527c6b1341979f4'),
+      title: 'Casablanca',
+      genres: [ 'Drama', 'Romance', 'War' ]
+   }
+]
+```

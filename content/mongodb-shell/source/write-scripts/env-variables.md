@@ -1,0 +1,68 @@
+# Use Environment Variables in MongoDB Shell Scripts
+
+You can use environment variables in your MongoDB Shell scripts to
+manage configuration settings and store sensitive information outside of
+your source code. For example, environment variables let you store
+database connection strings, API keys, and other parameters outside of
+your main scripts.
+
+## About this Task
+
+In the following example, you will learn how to use an environment
+variable for your MongoDB connection string.
+
+There are multiple ways to load environment variables from a file into
+your script. This example uses the built-in `loadEnvFile()` function,
+which loads variables from an `.env` file into your application's
+environment.
+
+## Steps
+
+**Create a file to store your environment variable**
+
+In an empty directory, create a new file named `.env`.
+
+**Define an environment variable**
+
+In the `.env` file, define an environment variable for your
+MongoDB connection string:
+
+```shell
+MONGODB_URI="<connection-string>"
+```
+
+**Write a script that uses the environment variable**
+
+In the same directory as your `.env` file, create a script
+called `myScript.js` and populate it with the following
+contents:
+
+```javascript
+// Load environment variables from the .env file
+const { loadEnvFile } = require('node:process');
+loadEnvFile();
+
+// Connect to the MongoDB database
+db = connect(process.env.MONGODB_URI);
+
+// Confirm the connection by printing the database name
+console.log(db);
+
+```
+
+The script uses the `process.env` object to access your
+connection string environment variable.
+
+**Run your script**
+
+The script outputs the name of the database you connected to. The
+default database is `test`.
+
+mongosh --file myScript.js
+test
+Learn More
+----------
+
+- mongosh-require-external-files-and-modules
+- mongosh-scoping
+- snip-overview
