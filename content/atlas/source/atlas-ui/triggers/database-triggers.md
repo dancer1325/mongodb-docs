@@ -1,5 +1,11 @@
 # Database Triggers
 
+respond to document insert, changes, or deletion
+* You can configure Database Triggers for each linked MongoDB collection.
+
+* _Example:_ collection's specific operation type
+* guarantee 1! event processing
+
 Database Triggers allow you to execute server-side logic whenever a database change occurs on a linked MongoDB Atlas cluster. You can configure Triggers on individual collections, entire databases, and on an entire cluster. Unlike SQL data triggers, which run on the database server, Atlas database Triggers run on a serverless compute layer that scales independently of the database server. Triggers automatically call Atlas Functions and can forward events to external handlers through AWS (Amazon Web Services) EventBridge. Use database Triggers to implement event-driven data interactions. For example, you can automatically update information in one document when a related document changes or send a request to an external service whenever a new document is inserted. Database Triggers use MongoDB [change streams](/changeStreams) to watch for real-time changes in a collection. A change stream is a series of database events that each describe an operation on a document in the collection. Your app opens a single change stream for each collection with at least one enabled Trigger. If you enable multiple Triggers for a collection they all share the same change stream.
 
 > **Important:**

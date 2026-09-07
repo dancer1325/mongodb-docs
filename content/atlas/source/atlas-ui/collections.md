@@ -4,24 +4,24 @@
   * -- via -- Atlas UI
   * -- via -- `mongosh`
 
-## Required Roles
+## Required Roles | Atlas project 
 
-The following table describes the roles required to manage the collections in an Atlas project:
-
-| Action | Required Roles |
-| --- | --- |
-| Create Collections | One of the following roles: - **Project Owner** or **Organization Owner** - **Project Data Access Admin** - **Project Data Access Read/Write** |
-| View Collections | At least the **Project Data Access Read Only** role. |
-| Drop Collections | One of the following roles: - **Project Owner** - **Project Data Access Admin** |
-| Shard Collections | One of the following roles: - **Project Owner** - **Organization Owner** |
+| Action             | Required Roles                                                                                                              |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| Create Collections | **Project Owner** <br/> **Organization Owner** <br/> **Project Data Access Admin** <br/> **Project Data Access Read/Write** |
+| View Collections   | \> **Project Data Access Read Only**                                                                                        |
+| Drop Collections   | **Project Owner** <br/> **Project Data Access Admin**                                                                       |
+| Shard Collections  | **Project Owner** <br/> **Organization Owner**                                                                              |
 
 ## Create a Collection
 
-> **Tip:**
-> To create the first collection in a new database, see atlas-ui-create-a-db.
+* [create the FIRST collection](databases.md#create-a-database)
+  * | database,
+    * ❌NOT ALLOWED ❌
+      * `config` 
+      * `system`
 
-> **Important:**
-> You cannot create new collections on the `config` and `system` databases. Atlas will deprecate writing to existing collections on these databases in the near future.
+TODO:
 
 To create a collection in an existing database through the Atlas UI:
 

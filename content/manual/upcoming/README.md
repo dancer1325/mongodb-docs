@@ -1,7 +1,3 @@
-=====================
-MongoDB Documentation
-=====================
-
 * goal
   * how to use MongoDB | your applications
     * _Examples:_ CRUD operations, full-text and vector search, data modeling, and performance tuning

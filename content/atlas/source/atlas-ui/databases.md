@@ -1,23 +1,23 @@
 # Create, View, and Drop Databases
 
-You can use the Atlas UI to manage the databases in your clusters.
+* Atlas UI
+  * allows
+    * manage the databases | your clusters
 
 ## Required Roles
 
-The following table describes the roles required to perform various actions to a database in the Atlas UI:
-
-| Action | Required Roles |
-| --- | --- |
-| Create Databases | One of the following roles: - **Project Owner** or **Organization Owner** - **Project Data Access Admin** - **Project Data Access Read/Write** |
-| View Databases | At least the **Project Data Access Read Only** role. |
-| Drop Databases | One of the following roles: - **Project Owner** - **Project Data Access Admin** |
+| Action           | Required Roles                                                                                                     |
+|------------------|--------------------------------------------------------------------------------------------------------------------|
+| Create Databases | **Project Owner** OR **Organization Owner** OR **Project Data Access Admin** OR **Project Data Access Read/Write** |
+| View Databases   | \> **Project Data Access Read Only** role                                                                          |
+| Drop Databases   | **Project Owner** OR **Project Data Access Admin**                                                                 |
 
 ## Create a Database
 
-To create a database through the Atlas UI:
+* steps
+  * Atlas UI > choose your project > **Data Explorer**
 
-1. In Atlas, go to the **Data Explorer** page for your project.
-
+TODO: 
    1. If it's not already displayed, select the organization that contains your project from the *[icon: office]* **Organizations** menu in the navigation bar.
    2. If it's not already displayed, select your project from the **Projects** menu in the navigation bar.
    3. In the sidebar, click **Data Explorer** under the **Database** heading. The [Data Explorer](https://cloud.mongodb.com/go?l=https%3A%2F%2Fcloud.mongodb.com%2Fv2%2F%3Cproject%3E%23%2Fmetrics%2FreplicaSet%2F%3Creplset%3E%2Fexplorer) displays.

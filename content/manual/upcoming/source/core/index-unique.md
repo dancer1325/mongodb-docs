@@ -1,0 +1,375 @@
+.. _index-type-unique:
+
+==============
+Unique Indexes
+==============
+
+.. facet::
+   :name: programming_language
+   :values: shell 
+
+.. facet::
+   :name: genre 
+   :values: reference
+
+.. meta:: 
+   :description: Use a unique index to ensure indexed fields do not store duplicate values.
+
+.. contents:: On this page
+   :local:
+   :backlinks: none
+   :depth: 1
+   :class: singlecol
+
+.. dismissible-skills-card::
+   :skill: Indexing Design Fundamentals
+   :url: https://learn.mongodb.com/skills?openTab=indexes
+
+Unique indexes ensure that values for the indexed fields are unique.
+
+- A unique single-field index ensures that a value appears at most once
+  for a given field.
+  
+- A unique compound index ensures that any given *combination* of
+  the index key values only appears at most once.
+
+By default, MongoDB creates a unique index on the :ref:`_id
+<document-id-field>` field when you create a new collection.
+
+.. |page-topic| replace:: :atlas:`create and manage unique indexes in the UI </atlas-ui/indexes>`
+
+.. cta-banner::
+   :url: https://www.mongodb.com/docs/atlas/atlas-ui/indexes/
+   :icon: Cloud
+   
+   .. include:: /includes/fact-atlas-compatible.rst
+
+To create a unique index in the MongoDB Shell, use the
+:method:`db.collection.createIndex()` method with the ``unique`` option
+set to ``true``. 
+
+.. code-block:: javascript
+
+   db.collection.createIndex(
+      { <field>: <sortOrder> },
+      { unique: true }
+    )
+
+Get Started
+-----------
+
+To create a unique index, see:
+
+- :ref:`index-unique-index`
+- :ref:`index-unique-compound-index`
+
+Details
+-------
+
+.. _unique-index-prepare-overview:
+
+prepareUnique Option
+~~~~~~~~~~~~~~~~~~~~
+
+MongoDB cannot directly create a unique index if the collection already
+contains data that would violate the unique constraint. To create a
+unique index on a collection that contains duplicate values, you can use
+the ``prepareUnique`` option.
+
+To use ``prepareUnique`` on a collection that contains duplicate values,
+follow these steps:
+
+1. Create a non-unique index on the field or fields that you want to
+   enforce uniqueness.
+
+#. Use the :dbcommand:`collMod` command to set ``prepareUnique`` to
+   ``true`` for the index.
+
+   When you set ``prepareUnique`` to ``true``, the unique constraint is
+   enforced for all new writes to the indexed field. Existing duplicate
+   values are not removed.
+
+#. Resolve any existing duplicate values in the indexed field.
+
+#. Use the ``collMod`` command to make the index unique.
+
+The ``prepareUnique`` feature is useful if you already have a dataset
+with duplicate values that you want to de-duplicate, and need to ensure
+that new duplicate values are not added during the cleanup process.
+
+For a complete example that uses ``prepareUnique``, see
+:ref:`index-convert-to-unique`.
+
+Building Unique Index on Replica Sets and Sharded Clusters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For replica sets and sharded clusters, using a :ref:`rolling procedure
+<index-build-on-replica-sets>` to create a unique index
+requires that you stop all writes to the collection during the
+procedure. If you cannot stop all writes to the collection during the
+procedure, do not use the rolling procedure. Instead, to build your 
+unique index on the collection you must either:
+
+- Run ``db.collection.createIndex()`` on the primary for a
+  replica set
+- Run ``db.collection.createIndex()`` on the :binary:`~bin.mongos` 
+  for a sharded cluster
+ 
+.. _unique-separate-documents:
+
+Unique Constraint on Array Fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The unique constraint applies to separate documents in the collection.
+That is, the unique index prevents *separate* documents from having the
+same value for the indexed key.
+
+Because the constraint applies to separate documents, for a unique
+:ref:`multikey <index-type-multikey>` index, a document may have array
+elements that result in repeating index key values as long as the index
+key values for that document do not duplicate those of another
+document. In this case, the repeated index entry is inserted into the
+index only once.
+
+For example, consider an ``inventory`` collection with the following documents
+representing products and their stock locations:
+
+.. literalinclude:: /code-examples/index-unique/create-collection.sh
+   :language: javascrupt
+
+Create a unique compound multikey index on ``inventory.warehouse`` and ``inventory.quantity``:
+
+.. literalinclude:: /code-examples/index-unique/create-index.sh
+   :language: javascript
+   
+The unique index permits the insertion of the following document into
+the collection if no other document in the collection has an index key
+value of ``{ "inventory.warehouse": "LA", "inventory.quantity": null }``.
+
+.. literalinclude:: /code-examples/index-unique/insert-one.sh
+   :language: javascript
+
+.. _unique-index-and-missing-field:
+
+Missing Document Field in a Unique Single-Field Index
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a document has a ``null`` or missing value for the indexed field in a unique
+single-field index, the index stores a ``null`` value for that document.
+Because of the unique constraint, a single-field unique index can only
+contain one document that contains a ``null`` value in its index entry. If there is
+more than one document with a ``null`` value in its index entry, the index
+build fails with a duplicate key error.
+
+For example, a collection has a unique single-field index on ``x``:
+
+.. code-block:: javascript
+
+   db.collection.createIndex( { "x": 1 }, { unique: true } )
+
+The unique index allows the insertion of a document without the field
+``x`` if the collection does not already contain a document missing the
+field ``x``:
+
+.. code-block:: javascript
+
+   db.collection.insertOne( { y: 1 } )
+
+However, you cannot insert a document without the field ``x`` if the
+collection already contains a document missing the field ``x``:
+
+.. code-block:: javascript
+
+   db.collection.insertOne( { z: 1 } )
+
+The operation fails to insert the document because of the violation of
+the unique constraint on the value of the field ``x``:
+
+.. code-block:: javascript
+
+   WriteResult({
+      "nInserted" : 0,
+      "writeError" : {
+         "code" : 11000,
+         "errmsg" : "E11000 duplicate key error index: test.collection.$a.b_1 dup key: { : null }"
+      }
+   })
+
+.. _unique-partial-indexes:
+
+Missing Document Fields in a Unique Compound Index
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If a document has a ``null`` or missing value for one or more indexed
+fields in a unique compound index, the index stores a null value for
+each ``null`` or missing field in the document's index entry. Because of
+the unique constraint, a unique compound index only permits one document
+that has a ``null`` value for all indexed fields in an index entry. If
+there is more than one index entry with a ``null`` value for all indexed
+fields, the index build fails with a duplicate key error. MongoDB
+permits multiple documents with missing fields in unique compound
+indexes as long as each index entry is unique. 
+
+For example, a collection ``students`` has a unique compound index on fields
+``name``, ``age``, and ``grade``:
+
+.. code-block:: javascript
+
+   db.students.createIndex( 
+      { 
+         "name": 1, 
+         "age": -1, 
+         "grade": 1 
+      }, 
+      { unique: true } 
+   )
+
+If the collection does not already contain identical documents, the
+unique compound index allows the insertion of the following documents
+that are all missing the ``grade`` field. 
+
+.. code-block:: javascript
+   
+   db.students.insertMany( [
+         { "name": "Meredith", "age": 12 }, 
+         { "name": "Olivia", "age": 11 }, 
+         { "name": "Benjamin" } 
+   ] )
+
+However, you cannot insert a document that has the same index key (value
+for ``name``, ``age``, and ``grade``) as another document in the
+collection. 
+
+.. code-block:: javascript
+   
+   db.students.insertOne( { name: "Meredith", age: 12 } )
+
+The operation fails to insert the document because of the violation of
+the unique constraint on the values of the fields ``name``, ``age``, and ``grade``:
+
+.. code-block:: javascript
+
+   WriteResult({
+      "nInserted" : 0,
+      "writeError" : {
+         "code" : 11000, 
+         "errmsg" :
+            "E11000 duplicate key error collection: test.students 
+            index: name_1_age_-1_grade_1 
+            dup key: { name: "Meredith", age: 12, grade: null }
+      }
+   } )
+
+You also cannot insert a document that is unique but shares an index
+key with an existing index entry. 
+
+.. code-block:: javascript
+   
+   db.students.insertOne( { name: "Olivia", "age": 11, "favorite color": "red"} )
+   
+The operation fails to insert the document because of the violation of
+the unique constraint on the values of the fields ``name``, ``age``, and
+``grade``:
+
+.. code-block:: javascript
+
+   WriteResult({
+      "nInserted" : 0,
+      "writeError" : {
+         "code" : 11000, 
+         "errmsg" :
+            "E11000 duplicate key error collection: test.students 
+            index: name_1_age_-1_grade_1 
+            dup key: { name: "Olivia", age: 11, grade: null }
+      }
+   } )
+
+
+Unique Partial Indexes
+~~~~~~~~~~~~~~~~~~~~~~
+
+Partial indexes only index the documents in a collection that meet a
+specified filter expression. If you specify both the
+``partialFilterExpression`` and a unique constraint, the unique
+constraint only applies to the documents that meet the filter
+expression.
+
+A partial index with a unique constraint does not prevent the insertion
+of documents that do not meet the unique constraint if the documents do
+not meet the filter criteria. For an example, see
+:ref:`partial-index-with-unique-constraints`.
+
+.. _sharded-clusters-unique-indexes:
+.. _unique-index-restrictions:
+
+Sharded Clusters and Unique Indexes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You cannot specify a unique constraint on a :ref:`hashed index
+<index-type-hashed>`.
+
+For a ranged sharded collection, only the following indexes can be
+:ref:`unique <index-type-unique>`:
+
+- The index on the shard key.
+
+- A :term:`compound index` where the shard key is a :ref:`prefix
+  <compound-index-prefix>`.
+
+- The default ``_id`` index. However, the ``_id`` index only enforces
+  the uniqueness constraint **per shard** if the ``_id`` field is not
+  the shard key.
+
+.. include:: /includes/sharding/shard-collection-uniqueness-enforcement-note.rst
+
+.. include:: /includes/sharding/sharding-unique-index-constraints.rst
+
+To maintain uniqueness on a field that is not your shard key, 
+see :ref:`shard-key-arbitrary-uniqueness`. 
+
+Sparse and Non-Sparse Unique Indexes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. include:: /includes/fact-5.0-sparse-unique-index-updates.rst
+
+Basic and Unique Indexes With Duplicate Key Patterns
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Basic and unique indexes can exist with the same :ref:`key pattern
+<key_patterns>`.
+
+This duplication in key patterns allows for adding a unique index to 
+already indexed fields.
+
+In this example:
+
+Create a basic index with the key pattern ``{ score : 1 }`` and insert 
+three documents.
+
+.. code-block:: javascript
+
+   db.scoreHistory.createIndex( { score : 1 }, { name: "basic_index" } )
+   db.scoreHistory.insert( { score : 1 } )
+   db.scoreHistory.insert( { score : 2 } )
+   db.scoreHistory.insert( { score : 3 } )
+
+Create a unique index with the same key pattern ``{ score : 1 }``.
+
+.. code-block:: javascript
+
+   db.scoreHistory.createIndex( { score : 1 }, { name: "unique_index", unique: true } )
+
+Try to insert a duplicate ``score`` document that fails because of
+the unique index.
+
+.. code-block:: javascript
+
+   db.scoreHistory.insert( { score : 3 } )
+
+.. toctree::
+   :titlesonly: 
+
+   Create Single-Field </core/index-unique/create>
+   Create Compound </core/index-unique/create-compound>
+   Convert to Unique </core/index-unique/convert-to-unique>
+   Shard Collection </tutorial/shard-collection-with-unique-index>

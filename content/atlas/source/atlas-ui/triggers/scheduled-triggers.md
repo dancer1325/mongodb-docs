@@ -1,5 +1,7 @@
 # Scheduled Triggers
 
+
+execute functions according to a pre-defined schedule.
 Scheduled Triggers allow you to execute server-side logic on a regular schedule that you define. You can use scheduled Triggers to do work that happens on a periodic basis, such as updating a document every minute, generating a nightly report, or sending an automated weekly email newsletter.
 
 ## Create a Scheduled Trigger
